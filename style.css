@@ -1,0 +1,229 @@
+/* Styles Généraux */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f4f7f6;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+
+.container {
+    width: 900px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    overflow: hidden;
+    text-align: center;
+}
+
+/* Header */
+header {
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+header h1 {
+    color: #1a436d;
+    font-size: 24px;
+    letter-spacing: 2px;
+}
+
+/* Navigation */
+nav {
+    display: flex;
+    background: #fff;
+    border-bottom: 2px solid #1a436d;
+}
+
+.nav-btn {
+    flex: 1;
+    padding: 15px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-weight: bold;
+    color: #555;
+    transition: 0.3s;
+}
+
+.nav-btn.active {
+    background: #1a436d;
+    color: white;
+}
+
+/* Sections */
+.content-section {
+    display: none; /* Cache toutes les sections par défaut */
+    padding: 40px 20px;
+}
+
+.content-section.active {
+    display: block; /* Affiche la section active */
+}
+
+/* Grille de l'Accueil (Cards) */
+.cards-container {
+    display: flex;
+    justify-content: space-around;
+    gap: 20px;
+}
+
+.card {
+    border: 1px solid #1a436d;
+    border-radius: 8px;
+    padding: 20px;
+    width: 30%;
+}
+
+.icon {
+    font-size: 40px;
+    margin-bottom: 15px;
+}
+
+/* Boutons d'action */
+.btn-action {
+    background: #1a436d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+
+}
+.btn-action:active{
+    box-shadow: 2px 2px 5px #612bc5;
+}
+
+/* Formulaires */
+.form-container {
+    max-width: 400px;
+    margin: auto;
+    text-align: left;
+}
+
+input, select {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Tableaux */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+/* Footer */
+footer {
+    padding: 20px;
+    font-size: 12px;
+    color: #888;
+}
+/* Boutton de recherche uniquement */
+.search{
+    width: 98%;
+    display: flex;
+    align-items: center;
+    border-radius: 10px;
+}
+/* Container principal du Dashboard */
+.dashboard-container {
+    background: #ffffff; /* Fond blanc propre */
+    border-radius: 10px; /* Coins arrondis */
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 95%;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* Ombre légère */
+    border: 1px solid #e0e6ed;
+}
+
+/* Titre du tableau de bord */
+.dashboard-title {
+    color: #1a436d; /* Bleu foncé identique à l'image */
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Grille pour aligner les 4 stats */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 colonnes égales */
+    gap: 15px;
+}
+
+/* Carte individuelle de statistique */
+.stat-card {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    transition: transform 0.3s ease; /* Animation au survol */
+}
+
+.stat-card:hover {
+    transform: translateY(-5px); /* Soulèvement au survol */
+    background: #eef2f7;
+}
+
+/* Icones dans les cartes */
+.stat-card img {
+    width: 45px;
+    height: 45px;
+    margin-right: 15px;
+}
+
+/* Organisation du texte (Chiffre au dessus du label) */
+.stat-content {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+/* Chiffre de l'enregistrement */
+.stat-number {
+    font-size: 22px;
+    font-weight: bold;
+    color: #1a436d;
+}
+
+/* Libellé du sacrement */
+.stat-label {
+    font-size: 12px;
+    color: #666;
+    font-weight: 500;
+}
+/* Style pour indiquer que la carte est un bouton */
+.cliquable {
+    cursor: pointer; /* Change le curseur en main au survol */
+    position: relative;
+    overflow: hidden;
+}
+
+/* Effet visuel au clic (actif) */
+.cliquable:active {
+    transform: scale(0.95); /* Effet d'enfoncement */
+    background-color: #d1d9e6;
+}
+
+/* Optionnel : ajouter une petite bordure bleue au survol pour renforcer l'idée de lien */
+.cliquable:hover {
+    border: 1px solid #1a436d;
+    box-shadow: 0 6px 15px rgba(26, 67, 109, 0.2);
+}
