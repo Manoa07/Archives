@@ -23,7 +23,7 @@ const dbPersonnes = Datastore.create({
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static('.'));
+app.use(express.static(__dirname));
 
 app.use(session({
     secret: 'votre_cle_secrete_eglise',
@@ -83,5 +83,12 @@ app.delete('/api/sacrements/:id', checkAuth, async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 app.listen(PORT, () => console.log(`Logiciel prêt : http://localhost:${PORT}`));

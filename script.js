@@ -315,7 +315,7 @@ function genererPDF(donnees) {
 
     // --- Contenu (Style manuscrit épuré) ---
     doc.setFontSize(16);
-    let y = 60;
+    let y = 80;
     const xLabel = 30;
 
     const lignes = [
