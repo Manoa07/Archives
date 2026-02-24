@@ -11,8 +11,14 @@ const app = express();
 const PORT = 3000;
 
 // Création des bases de données (Fichiers .db simples)
-const dbSacrements = Datastore.create({ filename: path.join(__dirname, 'sacrements.db'), autoload: true });
-const dbPersonnes = Datastore.create({ filename: path.join(__dirname, 'personnes.db'), autoload: true });
+const dbSacrements = Datastore.create({ 
+    filename: path.join(process.cwd(), 'sacrements.db'), 
+    autoload: true 
+});
+const dbPersonnes = Datastore.create({ 
+    filename: path.join(process.cwd(), 'personnes.db'), 
+    autoload: true 
+});
 
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors());
@@ -76,5 +82,6 @@ app.delete('/api/sacrements/:id', checkAuth, async (req, res) => {
         res.json({ message: "Supprimé avec succès" });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
+
 
 app.listen(PORT, () => console.log(`Logiciel prêt : http://localhost:${PORT}`));
