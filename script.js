@@ -178,7 +178,9 @@ async function enregistrerPersonne(event) {
     }
 }
 // Envoyer les données du formulaire
-async function submitSacrement() {
+async function submitSacrement(event) {
+    event.preventDefault();
+
     const formContainer = document.querySelector('.sacrement-form');
     const data = {
         type: document.querySelector('#sacrement select').value,
@@ -200,6 +202,7 @@ async function submitSacrement() {
     if (response.ok) {
         alert("Enregistré !");
         refreshData();
+        formContainer.reset();
         showSection('accueil');
     }
 }
@@ -391,6 +394,3 @@ function genererPDF(donnees) {
 //     doc.save(`Acte_Bapteme_${donnees.interesse.replace(/\s+/g, '_')}.pdf`);
 // }
 // Gardez vos fonctions showSection et animerCompteur existantes
-
-//Auto suppression des informations sur le formulaire 
-document.querySelector("form-grid").reset();

@@ -88,7 +88,7 @@
                 </div>
             </section>
             <section id="personne" class="content-section">
-                <div class="sacrement-form">
+                <form class="personne-form">
                     <h3>ENREGISTRER UNE NOUVELLE PERSONNE</h3>
                     <div class="form-container">
                         <input type="text" id="p-nom" placeholder="Nom Complet" required>
@@ -96,10 +96,10 @@
                         <input type="text" id="p-lieu" placeholder="Lieu de Naissance" required>
                     </div>
                     <button class="btn-action" onclick="enregistrerPersonne(event)">ENREGISTRER LA PERSONNE</button>
-                </div>
+                </form>
             </section>
             <section id="sacrement" class="content-section">
-                <div class="form-container sacrement-form">
+                <form class="form-container sacrement-form">
                     <h3>Enregistrer un Sacrement</h3>
                     <div class="form-grid">
                         <select class="full-width">
@@ -122,8 +122,8 @@
                         <input type="date" title="Date du Sacrement" class="half-width" autocomplete="off">
                         <input type="text" placeholder="Paroisse / Lieu" class="half-width" autocomplete="off">
                     </div>
-                    <button class="btn-action pulse-animation" onclick="submitSacrement()" type="submit">ENREGISTRER LE SACREMENT</button>
-                </div>
+                    <button class="btn-action pulse-animation" onclick="submitSacrement(event)" type="submit">ENREGISTRER LE SACREMENT</button>
+                </form>
             </section>
             <section id="recherche" class="content-section">
                 <div class="search-container">
