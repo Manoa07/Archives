@@ -22,28 +22,33 @@ async function tenterConnexion() {
  */
 function showSection(sectionId) {
     // 1. Cacher toutes les sections
-    const sections = document.querySelectorAll('.content-section');
-    sections.forEach(section => {
+    document.querySelectorAll('.content-section').forEach(section => {
         section.classList.remove('active');
     });
 
     // 2. Retirer l'état "active" de tous les boutons de navigation
-    const buttons = document.querySelectorAll('.nav-btn');
-    buttons.forEach(btn => {
+    document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.classList.remove('active');
     });
 
     // 3. Afficher la section demandée
     const targetSection = document.getElementById(sectionId);
-    targetSection.classList.add('active');
+    if (targetSection) {
+        targetSection.classList.add('active');
+    }
 
-    // 4. Mettre à jour le bouton de navigation correspondant
-    // On cherche le bouton qui contient l'appel vers cette section
-    buttons.forEach(btn => {
-        if(btn.getAttribute('onclick').includes(sectionId)) {
+    // 4. Activer le bon bouton de navigation s'il existe
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        const onclickAttr = btn.getAttribute('onclick');
+        if (onclickAttr && onclickAttr.includes(sectionId)) {
             btn.classList.add('active');
         }
     });
+
+    // 5. Action spécifique : Charger la liste si on va sur 'sacrement'
+    if (sectionId === 'sacrement') {
+        chargerListePersonnes();
+    }
 }
 /**
  * Fonction pour animer les compteurs du tableau de bord
@@ -138,19 +143,14 @@ function chargerListePersonnes() {
 // Fonction pour enregistrer une personne
 async function enregistrerPersonne(event) {
     event.preventDefault();
+    const btn = event.target;
+    btn.disabled = true; // Désactive pour éviter les doubles clics
 
-    // 1. Récupération des données par ID
     const data = {
-        nom: document.getElementById('p-nom').value,
+        nom: document.getElementById('p-nom').value.trim(),
         date_naissance: document.getElementById('p-date').value,
-        lieu_naissance: document.getElementById('p-lieu').value
+        lieu_naissance: document.getElementById('p-lieu').value.trim()
     };
-
-    // 2. Vérification rapide
-    if (!data.nom || !data.date_naissance) {
-        alert("Veuillez remplir au moins le nom et la date.");
-        return;
-    }
 
     try {
         const res = await fetch('/api/personnes', {
@@ -160,21 +160,18 @@ async function enregistrerPersonne(event) {
         });
 
         if (res.ok) {
-            alert("✅ Personne enregistrée dans la base de données !");
-            // Réinitialiser le formulaire
+            alert("✅ Personne enregistrée !");
+            // Vider les champs manuellement
             document.getElementById('p-nom').value = "";
             document.getElementById('p-date').value = "";
             document.getElementById('p-lieu').value = "";
             
-            // Recharger la liste pour l'onglet sacrement et changer de vue
-            chargerListePersonnes();
-            showSection('sacrement');
-        } else {
-            alert("❌ Erreur lors de l'enregistrement.");
+            showSection('sacrement'); // La nouvelle showSection chargera la liste
         }
     } catch (error) {
-        console.error("Erreur:", error);
-        alert("Impossible de contacter le serveur.");
+        alert("Erreur de connexion au serveur");
+    } finally {
+        btn.disabled = false;
     }
 }
 // Envoyer les données du formulaire
@@ -246,29 +243,23 @@ function updateStats(data) {
 // 1. Modifier le remplissage du tableau
 function fillTable(data) {
     const tbody = document.querySelector("#resultsTable tbody");
-    
+    if (!tbody) return;
+
     tbody.innerHTML = data.map(item => {
-        // Bouton PDF uniquement pour les baptêmes
         const boutonPDF = item.type === "Baptême" 
-            ? `<button class="btn-action" style=" padding: 5px 10px; margin-right: 5px;" 
-                onclick='genererPDF(${JSON.stringify(item)})'>📜 PDF</button>`
+            ? `<button class="btn-action" onclick='genererPDF(${JSON.stringify(item)})'>📜 PDF</button>`
             : "";
 
-        // Bouton Supprimer pour tous les enregistrements
-        const boutonSuppr = `<button class="btn-action" style="background-color: #e74c3c; padding: 5px 10px;" 
-            onclick="supprimerSacrement(${item.id})">🗑️</button>`;
+        // Correction : Utilisation de item._id (avec underscore pour NeDB)
+        const boutonSuppr = `<button class="btn-action" style="background-color: #e74c3c;" 
+            onclick="supprimerSacrement('${item._id}')">🗑️</button>`;
 
         return `
             <tr>
-                <td>${item.interesse}</td>
+                <td>${item.interesse || 'Non précisé'}</td>
                 <td>${item.type}</td>
                 <td>${item.date_sacrement}</td>
-                <td>
-                    <div style="display: flex;">
-                        ${boutonPDF}
-                        ${boutonSuppr}
-                    </div>
-                </td>
+                <td><div style="display: flex;">${boutonPDF}${boutonSuppr}</div></td>
             </tr>
         `;
     }).join('');
