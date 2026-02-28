@@ -134,10 +134,13 @@ function chargerListePersonnes() {
         .then(res => res.json())
         .then(personnes => {
             const select = document.getElementById('select-personne');
-            select.innerHTML = '<option value="">-- Choisir une personne --</option>';
+            let optionsHTML = '<option value="">-- Choisir une personne --</option>';
+
             personnes.forEach(p => {
-                select.innerHTML += `<option value="${p.nom}">${p.nom}</option>`;
+                optionsHTML += `<option value="${p.nom}">${p.nom}</option>`;
             });
+
+            select.innerHTML = optionsHTML;
         });
 }
 // Fonction pour enregistrer une personne
@@ -160,7 +163,7 @@ async function enregistrerPersonne(event) {
         });
 
         if (res.ok) {
-            alert("✅ Personne enregistrée !");
+            afficherMessage("✅ Personne enregistrée !");
             // Vider les champs manuellement
             document.getElementById('p-nom').value = "";
             document.getElementById('p-date').value = "";
@@ -169,7 +172,7 @@ async function enregistrerPersonne(event) {
             showSection('sacrement'); // La nouvelle showSection chargera la liste
         }
     } catch (error) {
-        alert("Erreur de connexion au serveur");
+        afficherMessage("Erreur de connexion au serveur", "error");
     } finally {
         btn.disabled = false;
     }
@@ -197,7 +200,7 @@ async function submitSacrement(event) {
     });
 
     if (response.ok) {
-        alert("Enregistré !");
+        afficherMessage("✅ Sacrement enregistré avec succès !");
         refreshData();
         formContainer.reset();
         showSection('accueil');
@@ -274,10 +277,10 @@ async function supprimerSacrement(id) {
             });
 
             if (response.ok) {
-                alert("Enregistrement supprimé.");
+                afficherMessage("Enregistrement supprimé.");
                 refreshData(); // Recharger les données et les compteurs
             } else {
-                alert("Erreur lors de la suppression.");
+                afficherMessage("Erreur lors de la suppression.", "error");
             }
         } catch (error) {
             console.error("Erreur:", error);
@@ -329,6 +332,18 @@ function genererPDF(donnees) {
     });
 
     doc.save(`Acte_Bapteme_${donnees.interesse}.pdf`);
+}
+
+function afficherMessage(message, type = "success") {
+    const alertBox = document.getElementById('custom-alert');
+    alertBox.innerHTML = message;
+
+    alertBox.style.backgroundColor = type === "error" ? "#e74c3c" : "#2ecc71";
+    alertBox.style.display = "block";
+
+    setTimeout(() => {
+        alertBox.style.display = "none";
+    }, 3000);
 }
 // function genererPDF(donnees) {
 //     const { jsPDF } = window.jspdf;

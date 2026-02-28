@@ -39,17 +39,17 @@
                     <div class="card">
                         <div class="icon">👤</div>
                         <p>ENREGISTRER UNE PERSONNE</p>
-                        <button class="btn-action" onclick="showSection('personne')">ENREGISTRER</button>
+                        <button type="button" class="btn-action" onclick="showSection('personne')">ENREGISTRER</button>
                     </div>
                     <div class="card">
                         <div class="icon">🕊️</div>
                         <p>ENREGISTRER UN SACREMENT</p>
-                        <button class="btn-action" onclick="showSection('sacrement')">ENREGISTRER</button>
+                        <button type="button" class="btn-action" onclick="showSection('sacrement')">ENREGISTRER</button>
                     </div>
                     <div class="card">
                         <div class="icon">🔍</div>
                         <p>RECHERCHER</p>
-                        <button class="btn-action" onclick="showSection('recherche')">RECHERCHER</button>
+                        <button type="button" class="btn-action" onclick="showSection('recherche')">RECHERCHER</button>
                     </div>
                 </div>
                 <div class="dashboard-container">
@@ -95,7 +95,7 @@
                         <input type="date" id="p-date" required>
                         <input type="text" id="p-lieu" placeholder="Lieu de Naissance" required>
                     </div>
-                    <button class="btn-action" onclick="enregistrerPersonne(event)">ENREGISTRER LA PERSONNE</button>
+                    <button type="submit" class="btn-action" onclick="enregistrerPersonne(event)">ENREGISTRER LA PERSONNE</button>
                 </form>
             </section>
             <section id="sacrement" class="content-section">
@@ -151,6 +151,11 @@
             <p>© 2026 Fiangonana Katoliaka MD Gérôme Anosybe<br>
         </footer>
     </div>
+
+    <div id="custom-alert">
+        Message
+    </div>
+
     <script src="jspdf.umd.min.js"></script>
     <script src="script.js"></script>
 </body>

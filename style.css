@@ -227,3 +227,18 @@ footer {
     border: 1px solid #1a436d;
     box-shadow: 0 6px 15px rgba(26, 67, 109, 0.2);
 }
+
+#custom-alert {
+    display: none;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #2ecc71;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 5px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    z-index: 10000;
+    font-weight: bold;
+    transition: 0.3s;
+}
