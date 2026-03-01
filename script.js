@@ -250,11 +250,11 @@ function fillTable(data) {
 
     tbody.innerHTML = data.map(item => {
         const boutonPDF = item.type === "Baptême" 
-            ? `<button class="btn-action" onclick='genererPDF(${JSON.stringify(item)})'>📜 PDF</button>`
+            ? `<button type="button" class="btn-action" onclick='genererPDF(${JSON.stringify(item)})'>📜 PDF</button>`
             : "";
 
         // Correction : Utilisation de item._id (avec underscore pour NeDB)
-        const boutonSuppr = `<button class="btn-action" style="background-color: #e74c3c;" 
+        const boutonSuppr = `<button type="button" class="btn-action" style="background-color: #e74c3c;" 
             onclick="supprimerSacrement('${item._id}')">🗑️</button>`;
 
         return `
@@ -268,25 +268,44 @@ function fillTable(data) {
     }).join('');
 }
 
-// 2. Fonction pour appeler l'API de suppression
-async function supprimerSacrement(id) {
-    if (confirm("Êtes-vous sûr de vouloir supprimer cet enregistrement définitivement ?")) {
-        try {
-            const response = await fetch(`/api/sacrements/${id}`, {
-                method: 'DELETE'
-            });
+// Fonction pour appeler l'API de suppression
+let idASupprimer = null;
 
-            if (response.ok) {
-                afficherMessage("Enregistrement supprimé.");
-                refreshData(); // Recharger les données et les compteurs
-            } else {
-                afficherMessage("Erreur lors de la suppression.", "error");
-            }
-        } catch (error) {
-            console.error("Erreur:", error);
-        }
-    }
+function supprimerSacrement(id) {
+    idASupprimer = id;
+    const boiteConfirm = document.getElementById('custom-confirm');
+    boiteConfirm.style.display = 'flex';
 }
+
+document.getElementById('btn-confirm-annuler').addEventListener('click', () => {
+    document.getElementById('custom-confirm').style.display = 'none';
+    idASupprimer = null;
+});
+
+document.getElementById('btn-confirm-oui').addEventListener('click', async () => {
+    document.getElementById('custom-confirm').style.display = 'none';
+
+    if (!idASupprimer) return;
+
+    try {
+        const response = await fetch(`/api/sacrements/${idASupprimer}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            afficherMessage("🗑️ Enregistrement supprimé avec succès.");
+            refreshData();
+        } else {
+            afficherMessage("❌ Erreur lors de la suppression.", "error");
+        }
+    } catch (error) {
+        console.error("Erreur:", error);
+        afficherMessage("❌ Impossible de contacter le serveur.", "error");
+    } finally {
+        idASupprimer = null;
+    }
+});
+
 // Gardez la fonction genererCertificatBapteme(donnees) que nous avons créée précédemment
 // Fonction pour créer le certificat PDF
 function genererPDF(donnees) {
