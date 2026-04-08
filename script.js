@@ -129,7 +129,7 @@ async function refreshData() {
     fillTable(data);
 }
 // Charger la liste des personnes dès que l'on clique sur l'onglet sacrement
-function chargerListePersonnes() {
+/*function chargerListePersonnes() {
     fetch('/api/personnes')
         .then(res => res.json())
         .then(personnes => {
@@ -142,7 +142,7 @@ function chargerListePersonnes() {
 
             select.innerHTML = optionsHTML;
         });
-}
+}*/
 // Fonction pour enregistrer une personne
 async function enregistrerPersonne(event) {
     event.preventDefault();
@@ -349,7 +349,10 @@ function genererPDF(donnees) {
         doc.text(`${ligne.label} : ${ligne.valeur}`, xLabel, y);
         y += 15;
     });
-
+    // --- Signature ---
+    doc.setFontSize(14);
+    doc.text("Le Curé .....................", 120, 240);
+    
     doc.save(`Acte_Bapteme_${donnees.interesse}.pdf`);
 }
 

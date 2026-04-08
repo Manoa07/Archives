@@ -25,8 +25,12 @@ header {
 
 header h1 {
     color: #1a436d;
-    font-size: 24px;
-    letter-spacing: 2px;
+    font-size: 25px;
+    
+}
+.mdj {
+    display: flex;
+    position: absolute;
 }
 
 /* Navigation */
@@ -163,7 +167,7 @@ footer {
 /* Grille pour aligner les 4 stats */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr); /* 4 colonnes égales */
+    grid-template-columns: repeat(5, 1fr); /* 4 colonnes égales */
     gap: 15px;
 }
 
