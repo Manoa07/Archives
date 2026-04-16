@@ -184,13 +184,16 @@ async function submitSacrement(event) {
     const formContainer = document.querySelector('.sacrement-form');
     const data = {
         type: document.querySelector('#sacrement select').value,
-        interesse: document.getElementById('select-personne').value, // On prend le nom choisi
-        pere: document.querySelector('#sacrement input[placeholder="Nom du Père"]').value,
-        mere: document.querySelector('#sacrement input[placeholder="Nom de la Mère"]').value,
-        parrain: document.querySelector('#sacrement input[placeholder="Parrain"]').value,
-        marraine: document.querySelector('#sacrement input[placeholder="Marraine"]').value,
-        date_sacrement: document.querySelector('#sacrement input[type="date"]').value,
-        lieu: document.querySelector('#sacrement input[placeholder="Paroisse / Lieu"]').value
+        interesse: document.getElementById('#sacrement input[placeholder="Anarana"]').value,
+        date_naissance: document.querySelector('#sacrement input[title="Andro nahaterahana"]').value,
+        pere: document.querySelector('#sacrement input[placeholder="Ray"]').value,
+        mere: document.querySelector('#sacrement input[placeholder="Reny"]').value,
+        adresse: document.querySelector('#sacrement input[placeholder="Monina ao"]').value,
+        lieu: document.querySelector('#sacrement input[placeholder="Natao tao"]').value,
+        date_sacrement: document.querySelector('#sacrement input[title="Andro sakramenta"]').value,
+        parrain: document.querySelector('#sacrement input[placeholder="Mpiantoka lahy"]').value,
+        marraine: document.querySelector('#sacrement input[placeholder="Mpiantoka vavy"]').value,
+        mon_pere: document.querySelector('#sacrement input[name="mopera"]').value
     };
 
     const response = await fetch('/api/sacrements', {
