@@ -16,6 +16,7 @@ function createDatabases(rootDir) {
     };
 }
 
+// Ajoute des données de démonstration uniquement au premier lancement si la base est vide.
 async function seedSacrementsIfEmpty(db) {
     const count = await db.sacrements.count({});
 

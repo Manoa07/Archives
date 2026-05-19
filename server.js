@@ -19,6 +19,7 @@ registerMariagesRoutes(app, db);
 registerSacrementsRoutes(app, db);
 registerPageRoutes(app, ROOT_DIR);
 
+// Démarre le backend HTTP après avoir préparé les données initiales.
 async function startServer() {
     await seedSacrementsIfEmpty(db);
 

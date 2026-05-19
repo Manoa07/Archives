@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
+// Charge un fichier .env simple pour alimenter process.env en local.
 function loadEnvFile() {
     const envPath = path.join(__dirname, '..', '.env');
 
@@ -37,6 +38,7 @@ const SESSION_SECRET = process.env.SESSION_SECRET;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const ROOT_DIR = path.join(__dirname, '..');
 
+// Vérifie que les variables critiques existent avant de démarrer le serveur.
 function validateConfig() {
     if (!SESSION_SECRET || !ADMIN_PASSWORD) {
         console.error(

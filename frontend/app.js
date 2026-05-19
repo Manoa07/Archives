@@ -6,12 +6,14 @@
 
     document.addEventListener('DOMContentLoaded', initApplication);
 
+    // Lance l'initialisation globale de l'interface après chargement du DOM.
     function initApplication() {
         bindEvents();
         AppUi.resetStats();
         restoreSession();
     }
 
+    // Branche tous les événements utilisateur sur les handlers applicatifs.
     function bindEvents() {
         AppDom.loginForm.addEventListener('submit', handleLoginSubmit);
         AppDom.mariageForm.addEventListener('submit', handleMariageSubmit);
@@ -39,6 +41,7 @@
         });
     }
 
+    // Vérifie si une session admin existe déjà pour éviter une reconnexion.
     async function restoreSession() {
         try {
             const session = await AppApi.apiRequest('/api/session');
@@ -52,6 +55,7 @@
         }
     }
 
+    // Authentifie l'utilisateur puis charge les données si le mot de passe est valide.
     async function handleLoginSubmit(event) {
         event.preventDefault();
 
@@ -71,6 +75,7 @@
         }
     }
 
+    // Construit puis envoie un enregistrement de mariage au backend.
     async function handleMariageSubmit(event) {
         event.preventDefault();
         const submitButton = event.submitter;
@@ -104,6 +109,7 @@
         }
     }
 
+    // Construit puis envoie un enregistrement de sacrement au backend.
     async function handleSacrementSubmit(event) {
         event.preventDefault();
         const submitButton = event.submitter;
@@ -136,10 +142,12 @@
         }
     }
 
+    // Relance le rendu du tableau selon le texte saisi dans la recherche.
     function handleSearchInput() {
         AppUi.renderTable(AppRecords.getFilteredRecords(AppDom.searchInput.value));
     }
 
+    // Lit proprement la valeur d'un champ HTML et supprime les espaces inutiles.
     function getValue(id) {
         const element = document.getElementById(id);
         return element ? element.value.trim() : '';

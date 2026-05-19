@@ -7,6 +7,7 @@ const { startServer } = require('./server');
 let mainWindow;
 let backendServer;
 
+// Attend que le backend réponde avant d'ouvrir l'interface Electron.
 async function waitForServer(url, timeoutMs = 5000) {
     const start = Date.now();
 
@@ -23,6 +24,7 @@ async function waitForServer(url, timeoutMs = 5000) {
     throw new Error(`Serveur indisponible après ${timeoutMs} ms`);
 }
 
+// Vérifie rapidement si une URL HTTP locale répond.
 function pingServer(url) {
     return new Promise((resolve) => {
         const req = http.get(url, (res) => {
@@ -38,6 +40,7 @@ function pingServer(url) {
     });
 }
 
+// Démarre le backend si nécessaire puis ouvre la fenêtre desktop Electron.
 async function createWindow() {
     const appUrl = `http://localhost:${PORT}`;
 

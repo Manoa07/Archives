@@ -2,6 +2,7 @@
 // Toute requête frontend -> backend devrait passer par ici,
 // ce qui simplifie la gestion des erreurs et des réponses JSON.
 (function attachApi(global) {
+    // Exécute une requête HTTP standardisée et convertit les erreurs en exceptions lisibles.
     async function apiRequest(url, options = {}) {
         const response = await fetch(url, {
             method: options.method || 'GET',
@@ -23,6 +24,7 @@
         return data;
     }
 
+    // Lit le corps de réponse uniquement si le serveur a renvoyé du JSON.
     async function parseResponseBody(response) {
         const contentType = response.headers.get('content-type') || '';
 

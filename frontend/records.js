@@ -3,6 +3,7 @@
 (function attachRecords(global) {
     const { AppApi, AppDom, AppState, AppUi, SACREMENT_TYPES } = global;
 
+    // Recharge toutes les données affichées puis met à jour dashboard et tableau.
     async function refreshData() {
         try {
             const [sacrements, mariages] = await Promise.all([
@@ -25,6 +26,7 @@
         }
     }
 
+    // Filtre tous les enregistrements à partir du nom, du type ou de la date.
     function getFilteredRecords(searchTerm = '') {
         const normalizedSearch = searchTerm.trim().toUpperCase();
         const records = getAllRecords();
@@ -47,16 +49,19 @@
         });
     }
 
+    // Fusionne les sacrements et les mariages dans une seule liste exploitable par l'UI.
     function getAllRecords() {
         return [...AppState.sacrements, ...AppState.mariages];
     }
 
+    // Ouvre la section recherche en présélectionnant un type de sacrement.
     function filterByType(type) {
         AppUi.showSection('recherche');
         AppDom.searchInput.value = type;
         AppUi.renderTable(getFilteredRecords(type));
     }
 
+    // Crée un mariage via l'API backend.
     async function createMariage(payload) {
         return AppApi.apiRequest('/api/mariages', {
             method: 'POST',
@@ -64,6 +69,7 @@
         });
     }
 
+    // Crée un sacrement via l'API backend.
     async function createSacrement(payload) {
         return AppApi.apiRequest('/api/sacrements', {
             method: 'POST',
@@ -71,6 +77,7 @@
         });
     }
 
+    // Supprime l'enregistrement sélectionné dans la boîte de confirmation.
     async function deleteSelectedRecord() {
         if (!AppState.deleteTargetId) {
             AppUi.closeDeleteConfirmation();
@@ -95,7 +102,8 @@
         }
     }
 
-    function generatePdf(record) {
+    // Génère un certificat PDF pour un acte de baptême.
+    function generatePdfBaptem(record) {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
 
@@ -105,10 +113,9 @@
         doc.setFont('Times New Roman');
         doc.setFontSize(15);
         doc.text('EKAR MD JEROME Anosibe', 95, 45, { align: 'right' });
-        doc.setFontSize(22);
+        doc.setFontSize(19);
         doc.text('FANAMARINANA NY NAHAVITANA BATEMY', 105, 65, { align: 'center' });
         doc.setFontSize(16);
-
         const lines = [
             ['Anarana', record.interesse],
             ['Ray', record.pere],
@@ -120,17 +127,80 @@
             ["Ray amn'ny Batemy", record.parrain],
             ["Reny amn'ny Batemy", record.marraine],
             ["Batemy nataon'i", record.mon_pere],
+            ['Afaka malalaka hanambady', '...............................................']
         ];
-
         let y = 80;
         lines.forEach(([label, value]) => {
             doc.text(`${label} : ${value || ''}`, 30, y);
-            y += 15;
+            y += 10;
         });
-
         doc.setFontSize(14);
-        doc.text('Le Curé .....................', 120, 240);
-        doc.save(`Acte_Bapteme_${record.interesse || 'certificat'}.pdf`);
+        doc.text('..........................', 120, 230)
+        doc.setFontSize(14);
+        doc.text('Ny pretra mitondra faritany', 120, 240);
+        doc.save(`Fanamarinana_Batemy_${record.interesse || 'certificat'}.pdf`);
+    }
+
+    //Génère un format PDF pour les mariages
+    function generatePdfMariage(record){
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.rect(20, 20, 170, 250);
+        doc.setFont('Times New Roman');
+        doc.setFontSize(15);
+        doc.text('EKAR MD JEROME Anosibe', 95, 45, { align: 'right' });
+        doc.setFontSize(19);
+        doc.text('FANAMARINANA', 105, 65, { align: 'center' });
+        doc.setFontSize(16);
+
+        const lines = [
+            ['Andriamtoa', record.epoux],
+            ['Ramatoa', record.epouse],
+            ['dia efa nandray ny SAKRAMENTA ny', 'Mariazy'],
+            ["Teto amn'ny",record.lieu],
+            ['Tamin ny', record.date_mariage],
+            ['Anio', new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })],
+        ];
+        let y = 80;
+        lines.forEach(([label, value]) => {
+            doc.text(`${label} : ${value || ''}`, 30, y);
+            y += 10;
+        });
+        doc.setFontSize(14);
+        doc.text("Ny PRETRA", 120, 170);
+        doc.save(`Fanamainana_Mariazy_${record.epoux || 'certificat'}_sy_${record.epouse || 'certificat'}.pdf`);
+    }
+
+    //Genère un format PDF pour les autres sacrements
+    function generatePdf(record) {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.rect(20, 20, 170, 250);
+        doc.setFont('Times New Roman');
+        doc.setFontSize(15);
+        doc.text('EKAR MD JEROME Anosibe', 95, 45, { align: 'right' });
+        doc.setFontSize(19);
+        doc.text('FANAMARINANA', 105, 65, { align: 'center' });
+        doc.setFontSize(16);
+
+        const lines = [
+            ['Anarana', record.interesse],
+            ['Ray', record.pere],
+            ['Reny', record.mere],
+            ['Monina ao', record.adresse],
+            ["Natao tao", record.lieu],
+            //['Andro nahaterahana', record.date_naissance],
+            ['dia efa nandray ny SAKRAMENTA ny', record.type],
+            ['Ny', record.date_sacrement]
+        ];
+         let y = 80;
+        lines.forEach(([label, value]) => {
+            doc.text(`${label} : ${value || ''}`, 30, y);
+            y += 10;
+        });
+        doc.setFontSize(14);
+        doc.text("Ny PRETRA", 120, 170);
+        doc.save(`Fanamainana_${record.type || 'certificat'}_${record.interesse || 'certificat'}.pdf`);
     }
 
     global.AppRecords = {
@@ -141,6 +211,8 @@
         createMariage,
         createSacrement,
         deleteSelectedRecord,
+        generatePdfBaptem,
+        generatePdfMariage,
         generatePdf
     };
 }(window));

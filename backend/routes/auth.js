@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 
 // Routes liées à la session d'administration.
 function registerAuthRoutes(app, adminPassword) {
+    // Le mot de passe configuré est haché une fois pour éviter de le comparer en clair.
     const passwordHash = bcrypt.hashSync(adminPassword, 10);
 
     app.post('/api/login', (req, res) => {

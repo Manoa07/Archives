@@ -3,6 +3,7 @@ const helmet = require('helmet');
 const cors = require('cors');
 const express = require('express');
 
+// Applique les middlewares communs à toute l'application Express.
 function applyBaseMiddleware(app, rootDir, sessionSecret) {
     app.use(helmet({ contentSecurityPolicy: false }));
     app.use(cors());
@@ -17,6 +18,7 @@ function applyBaseMiddleware(app, rootDir, sessionSecret) {
     }));
 }
 
+// Bloque l'accès aux routes protégées si la session admin n'est pas active.
 function checkAuth(req, res, next) {
     if (req.session.authenticated) {
         next();
@@ -26,6 +28,7 @@ function checkAuth(req, res, next) {
     res.status(403).json({ error: "Accès non autorisé" });
 }
 
+// Enveloppe une route asynchrone pour centraliser la réponse d'erreur 500.
 function asyncHandler(handler) {
     return async (req, res) => {
         try {
