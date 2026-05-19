@@ -1,18 +1,62 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, dialog } = require('electron');
+const http = require('http');
 const path = require('path');
-const { fork } = require('child_process');
+const { PORT } = require('./backend/config');
+const { startServer } = require('./server');
 
 let mainWindow;
+let backendServer;
 
-function createWindow() {
-    // 1. Lancer le serveur backend (votre server.js)
-    require('./server.js');
+async function waitForServer(url, timeoutMs = 5000) {
+    const start = Date.now();
 
-    // 2. Créer la fenêtre du logiciel
+    while (Date.now() - start < timeoutMs) {
+        const isReady = await pingServer(url);
+
+        if (isReady) {
+            return;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 150));
+    }
+
+    throw new Error(`Serveur indisponible après ${timeoutMs} ms`);
+}
+
+function pingServer(url) {
+    return new Promise((resolve) => {
+        const req = http.get(url, (res) => {
+            res.resume();
+            resolve(res.statusCode >= 200 && res.statusCode < 500);
+        });
+
+        req.on('error', () => resolve(false));
+        req.setTimeout(1000, () => {
+            req.destroy();
+            resolve(false);
+        });
+    });
+}
+
+async function createWindow() {
+    const appUrl = `http://localhost:${PORT}`;
+
+    // Si un backend existe déjà sur ce port, Electron le réutilise.
+    // Sinon il démarre sa propre instance.
+    try {
+        backendServer = await startServer();
+    } catch (error) {
+        if (error.code !== 'EADDRINUSE') {
+            throw error;
+        }
+    }
+
+    await waitForServer(appUrl);
+
     mainWindow = new BrowserWindow({
         width: 1000,
         height: 800,
-        icon: path.join(__dirname, 'icon.ico'), // Si vous avez une icône
+        icon: path.join(__dirname, 'icon.ico'),
         webPreferences: {
             nodeIntegration: false
         }
@@ -27,19 +71,27 @@ function createWindow() {
         });
     });
 
-    // 3. Charger votre interface
-    // On attend un petit peu que le serveur démarre
-    setTimeout(() => {
-        mainWindow.loadURL('http://localhost:3000');
-    }, 1000);
+    await mainWindow.loadURL(appUrl);
 
     mainWindow.on('closed', () => {
         mainWindow = null;
     });
 }
 
-app.on('ready', createWindow);
+app.whenReady().then(createWindow).catch((error) => {
+    console.error("Impossible de lancer l'application Electron :", error.message);
+    dialog.showErrorBox(
+        "Démarrage impossible",
+        `L'application n'a pas pu démarrer correctement.\n\nCause : ${error.message}`
+    );
+    app.quit();
+});
 
 app.on('window-all-closed', () => {
+    if (backendServer) {
+        backendServer.close();
+        backendServer = null;
+    }
+
     if (process.platform !== 'darwin') app.quit();
 });

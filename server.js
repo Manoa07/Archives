@@ -1,94 +1,45 @@
 const express = require('express');
-const Datastore = require('nedb-promises'); 
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const helmet = require('helmet');
-const path = require('path');
-const bcrypt = require('bcryptjs');
-const session = require('express-session');
+const { ADMIN_PASSWORD, PORT, ROOT_DIR, SESSION_SECRET, validateConfig } = require('./backend/config');
+const { createDatabases, seedSacrementsIfEmpty } = require('./backend/db');
+const { applyBaseMiddleware } = require('./backend/middleware');
+const { registerAuthRoutes } = require('./backend/routes/auth');
+const { registerMariagesRoutes } = require('./backend/routes/mariages');
+const { registerSacrementsRoutes } = require('./backend/routes/sacrements');
+const { registerPageRoutes } = require('./backend/routes/pages');
+
+validateConfig();
 
 const app = express();
-const PORT = 3000;
+const db = createDatabases(ROOT_DIR);
 
-// Création des bases de données (Fichiers .db simples)
-const dbSacrements = Datastore.create({ 
-    filename: path.join(process.cwd(), 'sacrements.db'), 
-    autoload: true 
-});
-const dbPersonnes = Datastore.create({ 
-    filename: path.join(process.cwd(), 'personnes.db'), 
-    autoload: true 
-});
+// Le point d'entrée assemble les briques, sans contenir leur logique interne.
+applyBaseMiddleware(app, ROOT_DIR, SESSION_SECRET);
+registerAuthRoutes(app, ADMIN_PASSWORD);
+registerMariagesRoutes(app, db);
+registerSacrementsRoutes(app, db);
+registerPageRoutes(app, ROOT_DIR);
 
-app.use(helmet({ contentSecurityPolicy: false }));
-app.use(cors());
-app.use(bodyParser.json());
-app.use(express.static(__dirname));
+async function startServer() {
+    await seedSacrementsIfEmpty(db);
 
-app.use(session({
-    secret: 'votre_cle_secrete_eglise',
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false }
-}));
+    return new Promise((resolve, reject) => {
+        const server = app.listen(PORT, () => {
+            console.log(`Logiciel prêt : http://localhost:${PORT}`);
+            resolve(server);
+        });
 
-const motDePasseHash = bcrypt.hashSync("admin123", 10);
+        server.on('error', reject);
+    });
+}
 
-// --- AUTHENTIFICATION ---
-app.post('/api/login', (req, res) => {
-    const { password } = req.body;
-    if (bcrypt.compareSync(password, motDePasseHash)) {
-        req.session.authenticated = true;
-        res.json({ success: true });
-    } else {
-        res.status(401).json({ success: false, message: "Mot de passe incorrect" });
-    }
-});
+if (require.main === module) {
+    startServer().catch((error) => {
+        console.error("Impossible de démarrer le serveur :", error.message);
+        process.exit(1);
+    });
+}
 
-const checkAuth = (req, res, next) => {
-    if (req.session.authenticated) next();
-    else res.status(403).json({ error: "Accès non autorisé" });
+module.exports = {
+    app,
+    startServer
 };
-
-// --- ROUTES PERSONNES ---
-app.post('/api/personnes', checkAuth, async (req, res) => {
-    try {
-        const doc = await dbPersonnes.insert(req.body);
-        res.json({ success: true, id: doc._id });
-    } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-app.get('/api/personnes', async (req, res) => {
-    const docs = await dbPersonnes.find({}).sort({ nom: 1 });
-    res.json(docs);
-});
-
-// --- ROUTES SACREMENTS ---
-app.post('/api/sacrements', checkAuth, async (req, res) => {
-    try {
-        const doc = await dbSacrements.insert(req.body);
-        res.json({ success: true, id: doc._id });
-    } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-app.get('/api/sacrements', async (req, res) => {
-    const docs = await dbSacrements.find({});
-    res.json(docs);
-});
-
-app.delete('/api/sacrements/:id', checkAuth, async (req, res) => {
-    try {
-        await dbSacrements.remove({ _id: req.params.id });
-        res.json({ message: "Supprimé avec succès" });
-    } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-app.listen(PORT, () => console.log(`Logiciel prêt : http://localhost:${PORT}`));

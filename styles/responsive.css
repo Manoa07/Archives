@@ -1,0 +1,27 @@
+@media (max-width: 720px) {
+    body {
+        padding: 0;
+    }
+
+    .container {
+        border-radius: 0;
+    }
+
+    .page-header {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .main-nav {
+        flex-wrap: wrap;
+    }
+
+    .nav-btn {
+        min-width: 50%;
+    }
+
+    .content-section {
+        padding: 24px 16px;
+    }
+}

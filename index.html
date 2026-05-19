@@ -4,154 +4,157 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Archives des Sacrements</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="styles/base.css">
+    <link rel="stylesheet" href="styles/layout.css">
+    <link rel="stylesheet" href="styles/components.css">
+    <link rel="stylesheet" href="styles/forms.css">
+    <link rel="stylesheet" href="styles/tables.css">
+    <link rel="stylesheet" href="styles/responsive.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div id="login-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#1a436d; z-index:9999; display:flex; justify-content:center; align-items:center;">
-        <div style="background:white; padding:30px; border-radius:10px; text-align:center; box-shadow:0 10px 25px rgba(0,0,0,0.3);">
-            <img src="./images/ekar.jpeg" width="60">
-            <h2 style="color:#1a436d;">Accès Archives</h2>
-            <input type="password" id="admin-password" placeholder="Mot de passe" style="padding:10px; width:200px; margin-bottom:15px; border:1px solid #ccc; border-radius:5px;"><br>
-            <button class="btn-action" onclick="tenterConnexion()">SE CONNECTER</button>
-            <p id="login-error" style="color:red; display:none; font-size:12px; margin-top:10px;">Mot de passe incorrect</p>
-        </div>
+    <div id="login-overlay" class="overlay">
+        <form id="login-form" class="overlay-card">
+            <img src="./images/ekar.jpeg" width="60" alt="Logo Ekar">
+            <h2 class="overlay-title">Accès Archives</h2>
+            <input type="password" id="admin-password" placeholder="Mot de passe" autocomplete="current-password" required>
+            <button class="btn-action" type="submit">SE CONNECTER</button>
+            <p id="login-error" class="error-text" hidden>Mot de passe incorrect</p>
+        </form>
     </div>
     <div class="container">
-        <header>
-            <div class="mdj">
-                <img src="./images/mdj.jpeg" alt="" width="50">
+        <header class="page-header">
+            <div class="header-left">
+                <img src="./images/mdj.jpeg" alt="Logo MDJ" width="50">
             </div>
-            <div class="logo">
+            <div class="header-center">
                 <img src="./images/ekar.jpeg" alt="Logo" width="50">
+                <h1>EKAR MD JERÔME ANOSIBE<br>DISTRIKA MAHAMASINA DIOSEZY ANTANANARIVO</h1>
             </div>
-            <h1>EKAR MD JERÔME ANOSIBE<br>DISTRIKA MAHAMASINA  DIOSEZY ANTANANARIVO</h1>
-            
         </header>
 
-        <nav>
-
-            <button class="nav-btn active" onclick="showSection('accueil')">ACCUEIL</button>
-            <button class="nav-btn" onclick="showSection('sacrement')">SACREMENT</button>
-            <button class="nav-btn" onclick="showSection('personne')">MARIAGE</button>
-            <button class="nav-btn" onclick="showSection('recherche')">RECHERCHER</button>
+        <nav class="main-nav">
+            <button class="nav-btn active" data-section-target="accueil" type="button">ACCUEIL</button>
+            <button class="nav-btn" data-section-target="sacrement" type="button">SACREMENT</button>
+            <button class="nav-btn" data-section-target="mariage" type="button">MARIAGE</button>
+            <button class="nav-btn" data-section-target="recherche" type="button">RECHERCHER</button>
         </nav>
 
         <main id="main-content">
-            
             <section id="accueil" class="content-section active">
                 <div class="cards-container">
                     <div class="card">
                         <div class="icon">👤</div>
                         <p>MARIAGE</p>
-                        <button type="button" class="btn-action" onclick="showSection('personne')">ENREGISTRER</button>
+                        <button type="button" class="btn-action" data-dashboard-target="mariage">ENREGISTRER</button>
                     </div>
                     <div class="card">
                         <div class="icon">🕊️</div>
                         <p>SACREMENT</p>
-                        <button type="button" class="btn-action" onclick="showSection('sacrement')">ENREGISTRER</button>
+                        <button type="button" class="btn-action" data-dashboard-target="sacrement">ENREGISTRER</button>
                     </div>
                     <div class="card">
                         <div class="icon">🔍</div>
                         <p>RECHERCHER</p>
-                        <button type="button" class="btn-action" onclick="showSection('recherche')">RECHERCHER</button>
+                        <button type="button" class="btn-action" data-dashboard-target="recherche">RECHERCHER</button>
                     </div>
                 </div>
                 <div class="dashboard-container">
                     <h3 class="dashboard-title">Bilan des Enregistrements</h3>
                     <div class="dashboard-grid">
-                        <div class="stat-card cliquable" onclick="ouvrirListeSacrement('Baptême')">
+                        <button class="stat-card cliquable" type="button" data-filter-type="Baptême">
                             <img src="./images/bapteme.png" alt="Baptême">
                             <div class="stat-content">
                                 <span class="stat-number" id="nb-bapteme">0</span>
                                 <span class="stat-label">Baptêmes</span>
                             </div>
-                        </div>
-                        <div class="stat-card cliquable" onclick="ouvrirListeSacrement('Communion')">
+                        </button>
+                        <button class="stat-card cliquable" type="button" data-filter-type="Première Communion">
                             <img src="./images/communion.png" alt="Communion">
                             <div class="stat-content">
                                 <span class="stat-number" id="nb-communion">0</span>
                                 <span class="stat-label">Communions</span>
                             </div>
-                        </div>
-                
-                        <div class="stat-card cliquable" onclick="ouvrirListeSacrement('Communion Solennelle')">
+                        </button>
+                        <button class="stat-card cliquable" type="button" data-filter-type="Communion Solennelle">
                             <img src="./images/comsol.png" alt="Communion Solennelle">
                             <div class="stat-content">
                                 <span class="stat-number" id="nb-solennelle">0</span>
                                 <span class="stat-label">C. Solennelles</span>
                             </div>
-                        </div>
-                        <div class="stat-card cliquable" onclick="ouvrirListeSacrement('Confirmation')">
+                        </button>
+                        <button class="stat-card cliquable" type="button" data-filter-type="Confirmation">
                             <img src="https://img.icons8.com/?size=100&id=-OzkWZAlhZsP&format=png&color=000000" alt="Confirmation">
                             <div class="stat-content">
                                 <span class="stat-number" id="nb-confirmation">0</span>
                                 <span class="stat-label">Confirmations</span>
                             </div>
-                        </div>
-                         <div class="stat-card cliquable" onclick="ouvrirListeSacrement('Mariage')">
+                        </button>
+                        <button class="stat-card cliquable" type="button" data-filter-type="Mariage">
                             <img src="./images/couple-de-mariage.png" alt="Mariage">
                             <div class="stat-content">
                                 <span class="stat-number" id="nb-mariage">0</span>
                                 <span class="stat-label">Mariages</span>
                             </div>
-                            
-                        </div>
-                
-                    </div>                          
+                        </button>
+                    </div>
                 </div>
             </section>
-            <section id="personne" class="content-section">
-                <form class="personne-form">
+            <section id="mariage" class="content-section">
+                <form id="mariage-form" class="app-form mariage-form">
                     <h3>ENREGISTRER UN MARIAGE</h3>
-                    <div class="form-container">
-                        <input type="text" id="p-nom" placeholder="Lahy" required>
-                        <input type="text" id="p-lieu" placeholder="Lieu de Naissance" required>
-                        <input type="text" id="p-nom" placeholder="Vavy" required>
-                        <input type="text" id="p-lieu" placeholder="Lieu de Naissance" required>
-                        <label>Vavolombelon'ny lahy</label>
-                        <input type="text" id="" placeholder=""required>
-                        <label>Sy</label>
-                        <input type="text"id="" placeholder=""required>
-                        <label>Vavolombelon'ny vavy</label>
-                        <input type="text"id="" placeholder=""required>
-                        <label>Sy</label>
-                        <input type="text"id="" placeholder="" required>
-                        <input type="date" id="p-date" required>
-                        
+                    <div class="form-stack">
+                        <input type="text" id="mariage-epoux" placeholder="Lahy" required>
+                        <input type="text" id="mariage-epouse" placeholder="Vavy" required>
+                        <label for="mariage-temoin-epoux-1">Vavolombelon'ny lahy</label>
+                        <input type="text" id="mariage-temoin-epoux-1" placeholder="A/toa" required>
+                        <label for="mariage-temoin-epoux-2">Sy</label>
+                        <input type="text" id="mariage-temoin-epoux-2" placeholder="Ramatoa" required>
+                        <label for="mariage-temoin-epouse-1">Vavolombelon'ny vavy</label>
+                        <input type="text" id="mariage-temoin-epouse-1" placeholder="A/toa" required>
+                        <label for="mariage-temoin-epouse-2">Sy</label>
+                        <input type="text" id="mariage-temoin-epouse-2" placeholder="Ramatoa" required>
+                        <label for="mariage-date">Datin'ny mariazy</label>
+                        <input type="date" id="mariage-date" required>
                     </div>
-                    <button type="submit" class="btn-action" onclick="enregistrerPersonne(event)">ENREGISTRER</button>
+                    <button type="submit" class="btn-action">ENREGISTRER</button>
                 </form>
             </section>
             <section id="sacrement" class="content-section">
-                <form class="form-container sacrement-form">
+                <form id="sacrement-form" class="app-form sacrement-form">
                     <h3>Enregistrer un Sacrement</h3>
                     <div class="form-grid">
-                        <select class="full-width">
-                            <option>Type de Sacrement (Baptême, Mariage, etc.)</option>
-                            <option>Baptême</option>
-                            <option>Première Communion</option>
-                            <option>Confirmation</option>   
-                            <option>Communion Solennelle</option>
+                        <select id="sacrement-type" class="full-width" required>
+                            <option value="">Type de Sacrement</option>
+                            <option value="Baptême">Baptême</option>
+                            <option value="Première Communion">Première Communion</option>
+                            <option value="Confirmation">Confirmation</option>
+                            <option value="Communion Solennelle">Communion Solennelle</option>
                         </select>
-                        <input type="text" placeholder="Anarana" class="half-width" autocomplete="off" required>
-                        <input type="date" title="Andro nahaterahana" class="half-width" autocomplete="off" required>
-                        <input type="text" placeholder="Ray" class="half-width" autocomplete="off">
-                        <input type="text" placeholder="Reny" class="half-width" autocomplete="off">
-                        <input type="text" placeholder="Monina ao" class="half-width" autocomplete="off">
-                        <input type="text" placeholder="Natao tao" class="half-width" autocomplete="off">
-                        <input type="date" title="Andro sakramenta" class="half-width" autocomplete="off">
-                        <input type="text" placeholder="Mpiantoka lahy" class="half-width" autocomplete="off">
-                        <input type="text" placeholder="Mpiantoka vavy" class="half-width" autocomplete="off">
-                        <input type="text" placeholder="Nataon'i" name="mopera" class="half-width" autocomplete="off">
+                        <input type="text" id="sacrement-interesse" placeholder="Anarana" class="half-width" autocomplete="off" required>
+                        <div class="date">
+                            <label for="sacrement-date-naissance">Daty nahaterahana</label>
+                            <input type="date" id="sacrement-date-naissance" class="half-width" autocomplete="off" required>
+                        </div>
+                        <input type="text" id="sacrement-pere" placeholder="Ray" class="half-width" autocomplete="off">
+                        <input type="text" id="sacrement-mere" placeholder="Reny" class="half-width" autocomplete="off">
+                        <input type="text" id="sacrement-adresse" placeholder="Monina ao" class="half-width" autocomplete="off">
+                        <input type="text" id="sacrement-lieu" placeholder="Natao tao" class="half-width" autocomplete="off">
+                        <div class="date">
+                            <label for="sacrement-date">Daty ny sakramenta</label>
+                            <input type="date" id="sacrement-date" class="half-width" autocomplete="off">
+                        </div>
+                        <input type="text" id="sacrement-parrain" placeholder="Mpiantoka lahy" class="half-width" autocomplete="off">
+                        <input type="text" id="sacrement-marraine" placeholder="Mpiantoka vavy" class="half-width" autocomplete="off">
+                        <input type="text" id="sacrement-celebrant" placeholder="Nataon'i" name="mopera" class="half-width" autocomplete="off">
                     </div>
-                    <button class="btn-action pulse-animation" onclick="submitSacrement(event)" type="submit">ENREGISTRER LE SACREMENT</button>
+                    <button class="btn-action" type="submit">ENREGISTRER LE SACREMENT</button>
                 </form>
             </section>
             <section id="recherche" class="content-section">
                 <div class="search-container">
                     <h3>RÉSULTATS DE RECHERCHE</h3>
-                    <input type="text" id="searchInput" placeholder="Rechercher par nom..." onkeyup="searchTable()" class="search" autocomplete="off">
+                    <input type="text" id="searchInput" placeholder="Rechercher par nom..." class="search" autocomplete="off">
                     <table id="resultsTable">
                         <thead>
                             <tr>
@@ -161,17 +164,13 @@
                                 <th>Action</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr><td>Jean Dupont</td><td>Baptême</td><td>12/05/2023</td></tr>
-                            <tr><td>Marie Curie</td><td>Mariage</td><td>22/08/2023</td></tr>
-                            <tr><td>Paul Valéry</td><td>Confirmation</td><td>15/10/2023</td></tr>
-                        </tbody>
+                        <tbody></tbody>
                     </table>
                 </div>
             </section>
         </main>
         <footer>
-            <p>© 2026 Fiangonana Katoliaka MD Gérôme Anosybe<br>
+            <p>© 2026 Fiangonana Katoliaka MD Jerôme Anosibe</p>
         </footer>
     </div>
 
@@ -191,7 +190,12 @@
     </div>
 
     <script src="jspdf.umd.min.js"></script>
-    <script src="script.js"></script>
+    <script src="frontend/state.js"></script>
+    <script src="frontend/dom.js"></script>
+    <script src="frontend/api.js"></script>
+    <script src="frontend/ui.js"></script>
+    <script src="frontend/records.js"></script>
+    <script src="frontend/app.js"></script>
 </body>
 
 </html>

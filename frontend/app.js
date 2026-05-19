@@ -1,0 +1,147 @@
+// Point d'entrée du frontend.
+// Ce fichier ne contient pas la logique détaillée:
+// il branche simplement les événements et orchestre les modules.
+(function bootstrapApp(global) {
+    const { AppApi, AppDom, AppRecords, AppUi, SACREMENT_TYPES } = global;
+
+    document.addEventListener('DOMContentLoaded', initApplication);
+
+    function initApplication() {
+        bindEvents();
+        AppUi.resetStats();
+        restoreSession();
+    }
+
+    function bindEvents() {
+        AppDom.loginForm.addEventListener('submit', handleLoginSubmit);
+        AppDom.mariageForm.addEventListener('submit', handleMariageSubmit);
+        AppDom.sacrementForm.addEventListener('submit', handleSacrementSubmit);
+        AppDom.searchInput.addEventListener('input', handleSearchInput);
+        AppDom.confirmCancel.addEventListener('click', AppUi.closeDeleteConfirmation);
+        AppDom.confirmDelete.addEventListener('click', AppRecords.deleteSelectedRecord);
+
+        AppDom.navButtons.forEach((button) => {
+            button.addEventListener('click', async () => {
+                AppUi.showSection(button.dataset.sectionTarget);
+                await AppRecords.refreshData();
+            });
+        });
+
+        AppDom.dashboardActions.forEach((button) => {
+            button.addEventListener('click', async () => {
+                AppUi.showSection(button.dataset.dashboardTarget);
+                await AppRecords.refreshData();
+            });
+        });
+
+        AppDom.dashboardCards.forEach((card) => {
+            card.addEventListener('click', () => AppRecords.filterByType(card.dataset.filterType));
+        });
+    }
+
+    async function restoreSession() {
+        try {
+            const session = await AppApi.apiRequest('/api/session');
+
+            if (session.authenticated) {
+                AppUi.setAuthenticated(true);
+                await AppRecords.refreshData();
+            }
+        } catch (error) {
+            AppUi.showToast("Impossible de vérifier la session.", 'error');
+        }
+    }
+
+    async function handleLoginSubmit(event) {
+        event.preventDefault();
+
+        try {
+            await AppApi.apiRequest('/api/login', {
+                method: 'POST',
+                body: { password: AppDom.loginPassword.value }
+            });
+
+            AppDom.loginPassword.value = '';
+            AppDom.loginError.hidden = true;
+            AppUi.setAuthenticated(true);
+            await AppRecords.refreshData();
+        } catch (error) {
+            AppDom.loginError.hidden = false;
+            AppDom.loginError.textContent = error.message || 'Mot de passe incorrect';
+        }
+    }
+
+    async function handleMariageSubmit(event) {
+        event.preventDefault();
+        const submitButton = event.submitter;
+        AppUi.setButtonLoading(submitButton, true);
+
+        const payload = {
+            type: SACREMENT_TYPES.MARIAGE,
+            epoux: getValue('mariage-epoux'),
+            epouse: getValue('mariage-epouse'),
+            temoinsEpoux: [
+                getValue('mariage-temoin-epoux-1'),
+                getValue('mariage-temoin-epoux-2')
+            ],
+            temoinsEpouse: [
+                getValue('mariage-temoin-epouse-1'),
+                getValue('mariage-temoin-epouse-2')
+            ],
+            date_mariage: getValue('mariage-date')
+        };
+
+        try {
+            await AppRecords.createMariage(payload);
+            AppDom.mariageForm.reset();
+            await AppRecords.refreshData();
+            AppUi.showSection('accueil');
+            AppUi.showToast('Mariage enregistré.');
+        } catch (error) {
+            AppUi.showToast(error.message || "Erreur lors de l'enregistrement du mariage.", 'error');
+        } finally {
+            AppUi.setButtonLoading(submitButton, false);
+        }
+    }
+
+    async function handleSacrementSubmit(event) {
+        event.preventDefault();
+        const submitButton = event.submitter;
+        AppUi.setButtonLoading(submitButton, true);
+
+        const payload = {
+            type: getValue('sacrement-type'),
+            interesse: getValue('sacrement-interesse'),
+            date_naissance: getValue('sacrement-date-naissance'),
+            pere: getValue('sacrement-pere'),
+            mere: getValue('sacrement-mere'),
+            adresse: getValue('sacrement-adresse'),
+            lieu: getValue('sacrement-lieu'),
+            date_sacrement: getValue('sacrement-date'),
+            parrain: getValue('sacrement-parrain'),
+            marraine: getValue('sacrement-marraine'),
+            mon_pere: getValue('sacrement-celebrant')
+        };
+
+        try {
+            await AppRecords.createSacrement(payload);
+            AppDom.sacrementForm.reset();
+            await AppRecords.refreshData();
+            AppUi.showSection('accueil');
+            AppUi.showToast('Sacrement enregistré avec succès.');
+        } catch (error) {
+            AppUi.showToast(error.message || "Erreur lors de l'enregistrement du sacrement.", 'error');
+        } finally {
+            AppUi.setButtonLoading(submitButton, false);
+        }
+    }
+
+    function handleSearchInput() {
+        AppUi.renderTable(AppRecords.getFilteredRecords(AppDom.searchInput.value));
+    }
+
+    function getValue(id) {
+        const element = document.getElementById(id);
+        return element ? element.value.trim() : '';
+    }
+}(window));
