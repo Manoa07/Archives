@@ -8,9 +8,19 @@ function registerMariagesRoutes(app, db) {
         res.json({ success: true, id: doc._id });
     });
 
+    // Met à jour un mariage existant à partir du formulaire frontend.
+    const updateMariage = asyncHandler(async (req, res) => {
+        await db.mariages.update(
+            { _id: req.params.id },
+            { $set: req.body }
+        );
+
+        res.json({ success: true, id: req.params.id });
+    });
+
     // Retourne la liste des mariages pour affichage et recherche.
     const listMariages = asyncHandler(async (req, res) => {
-        const docs = await db.mariages.find({}).sort({ nom: 1 });
+        const docs = await db.mariages.find({}).sort({ createdAt: 1 });
         res.json(docs);
     });
 
@@ -21,6 +31,7 @@ function registerMariagesRoutes(app, db) {
     });
 
     app.post('/api/mariages', checkAuth, createMariage);
+    app.put('/api/mariages/:id', checkAuth, updateMariage);
     app.get('/api/mariages', checkAuth, listMariages);
     app.delete('/api/mariages/:id', checkAuth, deleteMariage);
 }

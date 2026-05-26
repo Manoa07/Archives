@@ -1,5 +1,5 @@
 .container {
-    width: min(100%, 960px);
+    width: min(100%, 1100px);
     background: var(--color-surface);
     border-radius: 8px;
     box-shadow: var(--shadow-soft);
@@ -70,6 +70,34 @@
     max-width: 95%;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     border: 1px solid #e0e6ed;
+}
+
+.archives-container,
+.search-container {
+    background: var(--color-surface);
+    border-radius: 10px;
+    padding: 24px;
+    margin: 0 auto;
+    max-width: 95%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e0e6ed;
+    text-align: left;
+}
+
+.archives-container h3,
+.search-container h3 {
+    margin-top: 0;
+    color: var(--color-primary);
+}
+
+.section-subtitle {
+    margin: 0 0 16px;
+    color: var(--color-muted);
+}
+
+.table-scroll {
+    width: 100%;
+    overflow-x: auto;
 }
 
 .dashboard-grid {

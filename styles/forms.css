@@ -1,17 +1,41 @@
 .app-form {
-    max-width: 400px;
+    max-width: 760px;
     margin: auto;
     text-align: left;
+    background: var(--color-surface);
+    border: 1px solid #e0e6ed;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.app-form h3 {
+    margin-top: 0;
+    margin-bottom: 8px;
+    color: var(--color-primary);
 }
 
 .form-stack,
 .form-grid {
     display: grid;
-    gap: 12px;
+    gap: 16px;
 }
 
 .form-grid {
     grid-template-columns: 1fr;
+}
+
+.form-grid-two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.field-group {
+    display: grid;
+    gap: 8px;
+}
+
+.field-group-full {
+    grid-column: 1 / -1;
 }
 
 label {
@@ -23,10 +47,12 @@ label {
 input,
 select {
     width: 100%;
-    padding: 10px;
+    padding: 12px 14px;
     margin: 0;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    border: 1px solid #ccd5df;
+    border-radius: 8px;
+    background: #fff;
+    font: inherit;
 }
 
 .search {

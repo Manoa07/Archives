@@ -24,4 +24,10 @@
     .content-section {
         padding: 24px 16px;
     }
+
+    .archives-container,
+    .search-container {
+        max-width: 100%;
+        padding: 18px;
+    }
 }

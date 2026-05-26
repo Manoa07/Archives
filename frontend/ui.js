@@ -120,6 +120,46 @@
         renderRecordsIntoBody(AppDom.resultsBody, records, 'all');
     }
 
+    // Rend le tableau d'archives avec toutes les informations disponibles.
+    function renderArchives(records) {
+        if (!AppDom.archivesBody) {
+            return;
+        }
+
+        AppDom.archivesBody.innerHTML = '';
+
+        if (!records.length) {
+            const row = document.createElement('tr');
+            const cell = document.createElement('td');
+            cell.colSpan = 12;
+            cell.textContent = 'Aucune archive disponible.';
+            cell.className = 'empty-cell';
+            row.appendChild(cell);
+            AppDom.archivesBody.appendChild(row);
+            return;
+        }
+
+        records.forEach((record, index) => {
+            const row = document.createElement('tr');
+            const isMariage = record.type === SACREMENT_TYPES.MARIAGE;
+
+            row.appendChild(createCell(formatDisplayDate(resolveRecordDate(record))));
+            row.appendChild(createCell(resolveRecordName(record)));
+            row.appendChild(createCell(resolveParents(record, isMariage)));
+            row.appendChild(createCell(isMariage ? '' : (record.adresse || 'Non precise')));
+            row.appendChild(createCell(resolveAge(record.date_naissance)));
+            row.appendChild(createCell(resolveParrain(record, isMariage)));
+            row.appendChild(createCell(resolveMarraine(record, isMariage)));
+            row.appendChild(createCell(resolveMissionnaire(record, isMariage)));
+            row.appendChild(createCell(isMariage ? '' : (record.type || 'Non precise')));
+            row.appendChild(createCell(isMariage ? 'Oui' : ''));
+            row.appendChild(createCell(record.deces || ''));
+            row.appendChild(createCell(String(index + 1)));
+
+            AppDom.archivesBody.appendChild(row);
+        });
+    }
+
     // Reconstruit le corps d'un tableau HTML avec les enregistrements fournis.
     function renderRecordsIntoBody(tbody, records, mode) {
         if (!tbody) {
@@ -128,11 +168,22 @@
 
         tbody.innerHTML = '';
 
+        if (!records.length) {
+            const row = document.createElement('tr');
+            const cell = document.createElement('td');
+            cell.colSpan = 4;
+            cell.textContent = 'Aucun résultat.';
+            cell.className = 'empty-cell';
+            row.appendChild(cell);
+            tbody.appendChild(row);
+            return;
+        }
+
         records.forEach((record) => {
             const row = document.createElement('tr');
             row.appendChild(createCell(resolveRecordName(record)));
             row.appendChild(createCell(record.type || 'Non precise'));
-            row.appendChild(createCell(resolveRecordDate(record)));
+            row.appendChild(createCell(formatDisplayDate(resolveRecordDate(record))));
             row.appendChild(createActionsCell(record, mode));
             tbody.appendChild(row);
         });
@@ -174,6 +225,13 @@
             wrapper.appendChild(pdfButton);
         }
 
+        const editButton = document.createElement('button');
+        editButton.type = 'button';
+        editButton.className = 'btn-action btn-edit';
+        editButton.textContent = 'Modifier';
+        editButton.addEventListener('click', () => global.AppRecords.startEditingRecord(record._id, record.type));
+        wrapper.appendChild(editButton);
+
         const deleteButton = document.createElement('button');
         deleteButton.type = 'button';
         deleteButton.className = 'btn-action btn-danger';
@@ -194,9 +252,88 @@
         return record.interesse || 'Non precise';
     }
 
-    // Retourne la date métier pertinente pour l'affichage dans le tableau.
+    // Retourne la date du sacrement pertinente pour l'affichage dans le tableau.
     function resolveRecordDate(record) {
         return record.date_sacrement || record.date_mariage || 'Non precise';
+    }
+
+    // Met en forme une date ISO pour un affichage plus lisible.
+    function formatDisplayDate(value) {
+        if (!value || value === 'Non precise') {
+            return 'Non precise';
+        }
+
+        const date = new Date(value);
+
+        if (Number.isNaN(date.getTime())) {
+            return value;
+        }
+
+        return date.toLocaleDateString('fr-FR');
+    }
+
+    // Assemble les parents lorsqu'ils existent, sinon affiche les témoins de mariage.
+    function resolveParents(record, isMariage) {
+        if (isMariage) {
+            const temoins = [
+                ...(record.temoinsEpoux || []),
+                ...(record.temoinsEpouse || [])
+            ].filter(Boolean);
+
+            return temoins.join(' / ') || 'Non precise';
+        }
+
+        return [record.pere, record.mere].filter(Boolean).join(' / ') || 'Non precise';
+    }
+
+    // Calcule l'âge approximatif à partir de la date de naissance.
+    function resolveAge(dateNaissance) {
+        if (!dateNaissance) {
+            return '';
+        }
+
+        const birthDate = new Date(dateNaissance);
+
+        if (Number.isNaN(birthDate.getTime())) {
+            return '';
+        }
+
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            age -= 1;
+        }
+
+        return age >= 0 ? `${age} ans` : '';
+    }
+
+    // Réutilise la colonne parrain pour les témoins du côté époux lorsqu'il s'agit d'un mariage.
+    function resolveParrain(record, isMariage) {
+        if (isMariage) {
+            return (record.temoinsEpoux || []).filter(Boolean).join(' / ') || '';
+        }
+
+        return record.parrain || '';
+    }
+
+    // Réutilise la colonne marraine pour les témoins du côté épouse lorsqu'il s'agit d'un mariage.
+    function resolveMarraine(record, isMariage) {
+        if (isMariage) {
+            return (record.temoinsEpouse || []).filter(Boolean).join(' / ') || '';
+        }
+
+        return record.marraine || '';
+    }
+
+    // Retourne l'officiant du sacrement ou du mariage selon le type de document.
+    function resolveMissionnaire(record, isMariage) {
+        if (isMariage) {
+            return record.missionnaire || '';
+        }
+
+        return record.mon_pere || 'Non precise';
     }
 
     global.AppUi = {
@@ -210,6 +347,7 @@
         resetStats,
         renderDashboard,
         renderTable,
+        renderArchives,
         resolveRecordName,
         resolveRecordDate
     };

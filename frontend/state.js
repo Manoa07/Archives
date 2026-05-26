@@ -4,6 +4,8 @@
 window.AppState = {
     sacrements: [],
     mariages: [],
+    editingRecordId: null,
+    editingRecordType: null,
     deleteTargetId: null,
     deleteTargetType: null
 };

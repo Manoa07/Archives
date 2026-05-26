@@ -11,7 +11,7 @@ let backendServer;
 async function waitForServer(url, timeoutMs = 5000) {
     const start = Date.now();
 
-    while (Date.now() - start < timeoutMs) {
+    while (Date.now() - start < timeoutMs) { 
         const isReady = await pingServer(url);
 
         if (isReady) {

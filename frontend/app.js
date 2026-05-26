@@ -18,12 +18,19 @@
         AppDom.loginForm.addEventListener('submit', handleLoginSubmit);
         AppDom.mariageForm.addEventListener('submit', handleMariageSubmit);
         AppDom.sacrementForm.addEventListener('submit', handleSacrementSubmit);
+        AppDom.editSacrementForm.addEventListener('submit', handleEditSacrementSubmit);
+        AppDom.editMariageForm.addEventListener('submit', handleEditMariageSubmit);
         AppDom.searchInput.addEventListener('input', handleSearchInput);
         AppDom.confirmCancel.addEventListener('click', AppUi.closeDeleteConfirmation);
         AppDom.confirmDelete.addEventListener('click', AppRecords.deleteSelectedRecord);
+        AppDom.editSacrementCancel.addEventListener('click', handleCancelEdit);
+        AppDom.editSacrementClose.addEventListener('click', handleCancelEdit);
+        AppDom.editMariageCancel.addEventListener('click', handleCancelEdit);
+        AppDom.editMariageClose.addEventListener('click', handleCancelEdit);
 
         AppDom.navButtons.forEach((button) => {
             button.addEventListener('click', async () => {
+                AppRecords.cancelEditing();
                 AppUi.showSection(button.dataset.sectionTarget);
                 await AppRecords.refreshData();
             });
@@ -31,6 +38,7 @@
 
         AppDom.dashboardActions.forEach((button) => {
             button.addEventListener('click', async () => {
+                AppRecords.cancelEditing();
                 AppUi.showSection(button.dataset.dashboardTarget);
                 await AppRecords.refreshData();
             });
@@ -93,7 +101,9 @@
                 getValue('mariage-temoin-epouse-1'),
                 getValue('mariage-temoin-epouse-2')
             ],
-            date_mariage: getValue('mariage-date')
+            date_mariage: getValue('mariage-date'),
+            missionnaire: getValue('mariage-missionnaire'),
+            lieu: getValue('mariage-lieu')
         };
 
         try {
@@ -145,6 +155,45 @@
     // Relance le rendu du tableau selon le texte saisi dans la recherche.
     function handleSearchInput() {
         AppUi.renderTable(AppRecords.getFilteredRecords(AppDom.searchInput.value));
+    }
+
+    // Annule une modification en cours et revient à la liste filtrée.
+    function handleCancelEdit() {
+        AppRecords.cancelEditing();
+    }
+
+    async function handleEditSacrementSubmit(event) {
+        event.preventDefault();
+        const submitButton = event.submitter;
+        AppUi.setButtonLoading(submitButton, true);
+
+        try {
+            await AppRecords.saveEditedSacrement();
+            AppRecords.cancelEditing();
+            await AppRecords.refreshData();
+            AppUi.showToast('Sacrement modifié avec succès.');
+        } catch (error) {
+            AppUi.showToast(error.message || 'Erreur lors de la modification.', 'error');
+        } finally {
+            AppUi.setButtonLoading(submitButton, false);
+        }
+    }
+
+    async function handleEditMariageSubmit(event) {
+        event.preventDefault();
+        const submitButton = event.submitter;
+        AppUi.setButtonLoading(submitButton, true);
+
+        try {
+            await AppRecords.saveEditedMariage();
+            AppRecords.cancelEditing();
+            await AppRecords.refreshData();
+            AppUi.showToast('Mariage modifié avec succès.');
+        } catch (error) {
+            AppUi.showToast(error.message || 'Erreur lors de la modification.', 'error');
+        } finally {
+            AppUi.setButtonLoading(submitButton, false);
+        }
     }
 
     // Lit proprement la valeur d'un champ HTML et supprime les espaces inutiles.

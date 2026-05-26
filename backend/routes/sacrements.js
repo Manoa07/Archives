@@ -7,8 +7,17 @@ function registerSacrementsRoutes(app, db) {
         res.json({ success: true, id: doc._id });
     }));
 
+    app.put('/api/sacrements/:id', checkAuth, asyncHandler(async (req, res) => {
+        await db.sacrements.update(
+            { _id: req.params.id },
+            { $set: req.body }
+        );
+
+        res.json({ success: true, id: req.params.id });
+    }));
+
     app.get('/api/sacrements', checkAuth, asyncHandler(async (req, res) => {
-        const docs = await db.sacrements.find({});
+        const docs = await db.sacrements.find({}).sort({ createdAt: 1 });
         res.json(docs);
     }));
 

@@ -16,6 +16,7 @@
 
             AppUi.renderDashboard(getAllRecords());
             AppUi.renderTable(getFilteredRecords(AppDom.searchInput.value));
+            AppUi.renderArchives(getArchiveRecords());
         } catch (error) {
             if (error.status === 403) {
                 AppUi.setAuthenticated(false);
@@ -51,7 +52,13 @@
 
     // Fusionne les sacrements et les mariages dans une seule liste exploitable par l'UI.
     function getAllRecords() {
-        return [...AppState.sacrements, ...AppState.mariages];
+        return [...AppState.sacrements, ...AppState.mariages]
+            .sort((left, right) => compareRecordDates(right, left));
+    }
+
+    // Retourne les archives dans l'ordre d'insertion renvoyé par la base.
+    function getArchiveRecords() {
+        return [...AppState.sacrements];
     }
 
     // Ouvre la section recherche en présélectionnant un type de sacrement.
@@ -74,6 +81,104 @@
         return AppApi.apiRequest('/api/sacrements', {
             method: 'POST',
             body: payload
+        });
+    }
+
+    // Met à jour un mariage existant via l'API backend.
+    async function updateMariage(recordId, payload) {
+        return AppApi.apiRequest(`/api/mariages/${recordId}`, {
+            method: 'PUT',
+            body: payload
+        });
+    }
+
+    // Met à jour un sacrement existant via l'API backend.
+    async function updateSacrement(recordId, payload) {
+        return AppApi.apiRequest(`/api/sacrements/${recordId}`, {
+            method: 'PUT',
+            body: payload
+        });
+    }
+
+    // Passe l'interface en mode édition et remplit le formulaire correspondant.
+    function startEditingRecord(recordId, recordType) {
+        const record = findRecordById(recordId, recordType);
+
+        if (!record) {
+            AppUi.showToast("Enregistrement introuvable pour la modification.", 'error');
+            return;
+        }
+
+        cancelEditing();
+        AppState.editingRecordId = recordId;
+        AppState.editingRecordType = recordType;
+
+        if (recordType === SACREMENT_TYPES.MARIAGE) {
+            fillMariageEditForm(record);
+            AppDom.editMariageModal.hidden = false;
+            AppDom.editMariageModal.style.display = 'flex';
+            return;
+        }
+
+        fillSacrementEditForm(record);
+        AppDom.editSacrementModal.hidden = false;
+        AppDom.editSacrementModal.style.display = 'flex';
+    }
+
+    // Quitte le mode édition et remet les formulaires dans leur état de création.
+    function cancelEditing() {
+        AppState.editingRecordId = null;
+        AppState.editingRecordType = null;
+        AppDom.editSacrementForm.reset();
+        AppDom.editMariageForm.reset();
+        AppDom.editSacrementModal.hidden = true;
+        AppDom.editSacrementModal.style.display = 'none';
+        AppDom.editMariageModal.hidden = true;
+        AppDom.editMariageModal.style.display = 'none';
+    }
+
+    // Sauvegarde le sacrement en cours d'édition depuis sa fenêtre dédiée.
+    async function saveEditedSacrement() {
+        if (!AppState.editingRecordId || AppState.editingRecordType === SACREMENT_TYPES.MARIAGE) {
+            return;
+        }
+
+        await updateSacrement(AppState.editingRecordId, {
+            type: getInputValue('edit-sacrement-type'),
+            interesse: getInputValue('edit-sacrement-interesse'),
+            date_naissance: getInputValue('edit-sacrement-date-naissance'),
+            pere: getInputValue('edit-sacrement-pere'),
+            mere: getInputValue('edit-sacrement-mere'),
+            adresse: getInputValue('edit-sacrement-adresse'),
+            lieu: getInputValue('edit-sacrement-lieu'),
+            date_sacrement: getInputValue('edit-sacrement-date'),
+            parrain: getInputValue('edit-sacrement-parrain'),
+            marraine: getInputValue('edit-sacrement-marraine'),
+            mon_pere: getInputValue('edit-sacrement-celebrant')
+        });
+    }
+
+    // Sauvegarde le mariage en cours d'édition depuis sa fenêtre dédiée.
+    async function saveEditedMariage() {
+        if (!AppState.editingRecordId || AppState.editingRecordType !== SACREMENT_TYPES.MARIAGE) {
+            return;
+        }
+
+        await updateMariage(AppState.editingRecordId, {
+            type: SACREMENT_TYPES.MARIAGE,
+            epoux: getInputValue('edit-mariage-epoux'),
+            epouse: getInputValue('edit-mariage-epouse'),
+            temoinsEpoux: [
+                getInputValue('edit-mariage-temoin-epoux-1'),
+                getInputValue('edit-mariage-temoin-epoux-2')
+            ],
+            temoinsEpouse: [
+                getInputValue('edit-mariage-temoin-epouse-1'),
+                getInputValue('edit-mariage-temoin-epouse-2')
+            ],
+            date_mariage: getInputValue('edit-mariage-date'),
+            missionnaire: getInputValue('edit-mariage-missionnaire'),
+            lieu: getInputValue('edit-mariage-lieu')
         });
     }
 
@@ -157,8 +262,9 @@
             ['Andriamtoa', record.epoux],
             ['Ramatoa', record.epouse],
             ['dia efa nandray ny SAKRAMENTA ny', 'Mariazy'],
-            ["Teto amn'ny",record.lieu],
+            ["Teto",record.lieu],
             ['Tamin ny', record.date_mariage],
+            ["Nohamasinin'i", record.missionnaire],
             ['Anio', new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })],
         ];
         let y = 80;
@@ -168,7 +274,7 @@
         });
         doc.setFontSize(14);
         doc.text("Ny PRETRA", 120, 170);
-        doc.save(`Fanamainana_Mariazy_${record.epoux || 'certificat'}_sy_${record.epouse || 'certificat'}.pdf`);
+        doc.save(`Fanamarinana_Mariazy_${record.epoux || 'certificat'}_sy_${record.epouse || 'certificat'}.pdf`);
     }
 
     //Genère un format PDF pour les autres sacrements
@@ -189,7 +295,6 @@
             ['Reny', record.mere],
             ['Monina ao', record.adresse],
             ["Natao tao", record.lieu],
-            //['Andro nahaterahana', record.date_naissance],
             ['dia efa nandray ny SAKRAMENTA ny', record.type],
             ['Ny', record.date_sacrement]
         ];
@@ -200,16 +305,85 @@
         });
         doc.setFontSize(14);
         doc.text("Ny PRETRA", 120, 170);
-        doc.save(`Fanamainana_${record.type || 'certificat'}_${record.interesse || 'certificat'}.pdf`);
+        doc.save(`Fanamarinana_${record.type || 'certificat'}_${record.interesse || 'certificat'}.pdf`);
+    }
+
+    // Compare deux enregistrements selon leur date métier pour garder un affichage stable.
+    function compareRecordDates(left, right) {
+        const leftTime = toTimestamp(left.date_sacrement || left.date_mariage);
+        const rightTime = toTimestamp(right.date_sacrement || right.date_mariage);
+
+        return leftTime - rightTime;
+    }
+
+    // Convertit une date texte en timestamp exploitable pour le tri.
+    function toTimestamp(value) {
+        if (!value) {
+            return 0;
+        }
+
+        const timestamp = new Date(value).getTime();
+        return Number.isNaN(timestamp) ? 0 : timestamp;
+    }
+
+    function findRecordById(recordId, recordType) {
+        const source = recordType === SACREMENT_TYPES.MARIAGE ? AppState.mariages : AppState.sacrements;
+        return source.find((record) => record._id === recordId) || null;
+    }
+
+    function fillMariageEditForm(record) {
+        setValue('edit-mariage-epoux', record.epoux);
+        setValue('edit-mariage-epouse', record.epouse);
+        setValue('edit-mariage-temoin-epoux-1', record.temoinsEpoux?.[0]);
+        setValue('edit-mariage-temoin-epoux-2', record.temoinsEpoux?.[1]);
+        setValue('edit-mariage-temoin-epouse-1', record.temoinsEpouse?.[0]);
+        setValue('edit-mariage-temoin-epouse-2', record.temoinsEpouse?.[1]);
+        setValue('edit-mariage-date', record.date_mariage);
+        setValue('edit-mariage-missionnaire', record.missionnaire);
+        setValue('edit-mariage-lieu', record.lieu);
+    }
+
+    function fillSacrementEditForm(record) {
+        setValue('edit-sacrement-type', record.type);
+        setValue('edit-sacrement-interesse', record.interesse);
+        setValue('edit-sacrement-date-naissance', record.date_naissance);
+        setValue('edit-sacrement-pere', record.pere);
+        setValue('edit-sacrement-mere', record.mere);
+        setValue('edit-sacrement-adresse', record.adresse);
+        setValue('edit-sacrement-lieu', record.lieu);
+        setValue('edit-sacrement-date', record.date_sacrement);
+        setValue('edit-sacrement-parrain', record.parrain);
+        setValue('edit-sacrement-marraine', record.marraine);
+        setValue('edit-sacrement-celebrant', record.mon_pere);
+    }
+
+    function setValue(id, value) {
+        const element = document.getElementById(id);
+
+        if (element) {
+            element.value = value || '';
+        }
+    }
+
+    function getInputValue(id) {
+        const element = document.getElementById(id);
+        return element ? element.value.trim() : '';
     }
 
     global.AppRecords = {
         refreshData,
+        getArchiveRecords,
         getFilteredRecords,
         getAllRecords,
         filterByType,
         createMariage,
         createSacrement,
+        updateMariage,
+        updateSacrement,
+        startEditingRecord,
+        cancelEditing,
+        saveEditedSacrement,
+        saveEditedMariage,
         deleteSelectedRecord,
         generatePdfBaptem,
         generatePdfMariage,
