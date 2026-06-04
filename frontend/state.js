@@ -7,7 +7,11 @@ window.AppState = {
     editingRecordId: null,
     editingRecordType: null,
     deleteTargetId: null,
-    deleteTargetType: null
+    deleteTargetType: null,
+    tablePages: {
+        results: 1,
+        archives: 1
+    }
 };
 
 // Constantes métier utilisées dans plusieurs vues.

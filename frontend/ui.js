@@ -2,6 +2,7 @@
 // rendu du tableau et dialogue de confirmation.
 (function attachUi(global) {
     const { AppDom, AppState, SACREMENT_TYPES } = global;
+    const TABLE_PAGE_SIZE = 20;
 
     // Affiche une section et synchronise l'état actif du menu principal.
     function showSection(sectionId) {
@@ -117,47 +118,109 @@
 
     // Rend le tableau principal à partir d'une liste d'enregistrements.
     function renderTable(records) {
-        renderRecordsIntoBody(AppDom.resultsBody, records, 'all');
+        renderPaginatedRecords({
+            tbody: AppDom.resultsBody,
+            pager: AppDom.resultsPager,
+            prevButton: AppDom.resultsPrevPage,
+            nextButton: AppDom.resultsNextPage,
+            label: AppDom.resultsPageLabel,
+            records,
+            mode: 'all',
+            pageKey: 'results'
+        });
     }
 
     // Rend le tableau d'archives avec toutes les informations disponibles.
     function renderArchives(records) {
-        if (!AppDom.archivesBody) {
+        renderPaginatedRecords({
+            tbody: AppDom.archivesBody,
+            pager: AppDom.archivesPager,
+            prevButton: AppDom.archivesPrevPage,
+            nextButton: AppDom.archivesNextPage,
+            label: AppDom.archivesPageLabel,
+            records,
+            mode: 'archives',
+            pageKey: 'archives'
+        });
+    }
+
+    function renderPaginatedRecords({ tbody, pager, prevButton, nextButton, label, records, mode, pageKey }) {
+        if (!tbody) {
             return;
         }
 
-        AppDom.archivesBody.innerHTML = '';
+        const totalPages = Math.max(1, Math.ceil(records.length / TABLE_PAGE_SIZE));
+        const currentPage = Math.min(AppState.tablePages[pageKey] || 1, totalPages);
+        AppState.tablePages[pageKey] = currentPage;
+        const startIndex = (currentPage - 1) * TABLE_PAGE_SIZE;
+        const pageRecords = records.slice(startIndex, startIndex + TABLE_PAGE_SIZE);
+
+        tbody.innerHTML = '';
 
         if (!records.length) {
             const row = document.createElement('tr');
             const cell = document.createElement('td');
-            cell.colSpan = 12;
-            cell.textContent = 'Aucune archive disponible.';
+            cell.colSpan = mode === 'archives' ? 12 : 4;
+            cell.textContent = mode === 'archives' ? 'Aucune archive disponible.' : 'Aucun résultat.';
             cell.className = 'empty-cell';
             row.appendChild(cell);
-            AppDom.archivesBody.appendChild(row);
+            tbody.appendChild(row);
+            updatePaginationControls({ pager, prevButton, nextButton, label, currentPage: 1, totalPages: 1 });
             return;
         }
 
-        records.forEach((record, index) => {
-            const row = document.createElement('tr');
-            const isMariage = record.type === SACREMENT_TYPES.MARIAGE;
+        if (mode === 'archives') {
+            pageRecords.forEach((record, index) => {
+                const row = document.createElement('tr');
+                const isMariage = record.type === SACREMENT_TYPES.MARIAGE;
 
-            row.appendChild(createCell(formatDisplayDate(resolveRecordDate(record))));
-            row.appendChild(createCell(resolveRecordName(record)));
-            row.appendChild(createCell(resolveParents(record, isMariage)));
-            row.appendChild(createCell(isMariage ? '' : (record.adresse || 'Non precise')));
-            row.appendChild(createCell(resolveAge(record.date_naissance)));
-            row.appendChild(createCell(resolveParrain(record, isMariage)));
-            row.appendChild(createCell(resolveMarraine(record, isMariage)));
-            row.appendChild(createCell(resolveMissionnaire(record, isMariage)));
-            row.appendChild(createCell(isMariage ? '' : (record.type || 'Non precise')));
-            row.appendChild(createCell(isMariage ? 'Oui' : ''));
-            row.appendChild(createCell(record.deces || ''));
-            row.appendChild(createCell(String(index + 1)));
+                row.appendChild(createCell(formatDisplayDate(resolveRecordDate(record))));
+                row.appendChild(createCell(resolveRecordName(record)));
+                row.appendChild(createCell(resolveParents(record, isMariage)));
+                row.appendChild(createCell(isMariage ? '' : (record.adresse || 'Non precise')));
+                row.appendChild(createCell(resolveAge(record.date_naissance)));
+                row.appendChild(createCell(resolveParrain(record, isMariage)));
+                row.appendChild(createCell(resolveMarraine(record, isMariage)));
+                row.appendChild(createCell(resolveMissionnaire(record, isMariage)));
+                row.appendChild(createCell(isMariage ? '' : (record.type || 'Non precise')));
+                row.appendChild(createCell(isMariage ? 'Oui' : ''));
+                row.appendChild(createCell(record.deces || ''));
+                row.appendChild(createCell(String(startIndex + index + 1)));
 
-            AppDom.archivesBody.appendChild(row);
-        });
+                tbody.appendChild(row);
+            });
+        } else {
+            pageRecords.forEach((record) => {
+                const row = document.createElement('tr');
+                row.appendChild(createCell(resolveRecordName(record)));
+                row.appendChild(createCell(record.type || 'Non precise'));
+                row.appendChild(createCell(formatDisplayDate(resolveRecordDate(record))));
+                row.appendChild(createActionsCell(record, mode));
+                tbody.appendChild(row);
+            });
+        }
+
+        updatePaginationControls({ pager, prevButton, nextButton, label, currentPage, totalPages });
+    }
+
+    function updatePaginationControls({ pager, prevButton, nextButton, label, currentPage, totalPages }) {
+        if (!pager || !prevButton || !nextButton || !label) {
+            return;
+        }
+
+        pager.hidden = totalPages <= 1;
+        label.textContent = `Page ${currentPage} / ${totalPages}`;
+        prevButton.disabled = currentPage <= 1;
+        nextButton.disabled = currentPage >= totalPages;
+    }
+
+    function setTablePage(pageKey, page) {
+        AppState.tablePages[pageKey] = Math.max(1, page);
+    }
+
+    function goToTablePage(pageKey, delta, rerender) {
+        setTablePage(pageKey, (AppState.tablePages[pageKey] || 1) + delta);
+        rerender();
     }
 
     // Reconstruit le corps d'un tableau HTML avec les enregistrements fournis.
@@ -348,6 +411,8 @@
         renderDashboard,
         renderTable,
         renderArchives,
+        setTablePage,
+        goToTablePage,
         resolveRecordName,
         resolveRecordDate
     };

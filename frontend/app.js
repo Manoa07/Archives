@@ -21,6 +21,11 @@
         AppDom.editSacrementForm.addEventListener('submit', handleEditSacrementSubmit);
         AppDom.editMariageForm.addEventListener('submit', handleEditMariageSubmit);
         AppDom.searchInput.addEventListener('input', handleSearchInput);
+        AppDom.resultsPrevPage.addEventListener('click', () => handleTablePageChange('results', -1));
+        AppDom.resultsNextPage.addEventListener('click', () => handleTablePageChange('results', 1));
+        AppDom.archivesPrevPage.addEventListener('click', () => handleTablePageChange('archives', -1));
+        AppDom.archivesNextPage.addEventListener('click', () => handleTablePageChange('archives', 1));
+        AppDom.archivesExportCsv.addEventListener('click', handleArchiveExport);
         AppDom.confirmCancel.addEventListener('click', AppUi.closeDeleteConfirmation);
         AppDom.confirmDelete.addEventListener('click', AppRecords.deleteSelectedRecord);
         AppDom.editSacrementCancel.addEventListener('click', handleCancelEdit);
@@ -154,7 +159,23 @@
 
     // Relance le rendu du tableau selon le texte saisi dans la recherche.
     function handleSearchInput() {
+        AppUi.setTablePage('results', 1);
         AppUi.renderTable(AppRecords.getFilteredRecords(AppDom.searchInput.value));
+    }
+
+    function handleTablePageChange(pageKey, delta) {
+        AppUi.goToTablePage(pageKey, delta, () => {
+            if (pageKey === 'results') {
+                AppUi.renderTable(AppRecords.getFilteredRecords(AppDom.searchInput.value));
+                return;
+            }
+
+            AppUi.renderArchives(AppRecords.getArchiveRecords());
+        });
+    }
+
+    function handleArchiveExport() {
+        AppRecords.exportArchiveTable();
     }
 
     // Annule une modification en cours et revient à la liste filtrée.

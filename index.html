@@ -231,11 +231,21 @@
                             <tbody></tbody>
                         </table>
                     </div>
+                    <div class="table-pagination" id="resultsPager" hidden>
+                        <button type="button" class="btn-action btn-secondary btn-pagination" id="resultsPrevPage">Précédent</button>
+                        <span class="table-pagination-label" id="resultsPageLabel"></span>
+                        <button type="button" class="btn-action btn-secondary btn-pagination" id="resultsNextPage">Suivant</button>
+                    </div>
                 </div>
             </section>
             <section id="archive" class="content-section">
                 <div class="archives-container">
                     <h3>Archives</h3>
+                    <div class="table-toolbar">
+                        <button type="button" class="btn-action btn-secondary" id="archivesExportCsv">
+                            Exporter le tableau
+                        </button>
+                    </div>
                     <div class="table-scroll">
                         <table id="archivesTable">
                             <thead>
@@ -256,6 +266,11 @@
                             </thead>
                             <tbody></tbody>
                         </table>
+                    </div>
+                    <div class="table-pagination" id="archivesPager" hidden>
+                        <button type="button" class="btn-action btn-secondary btn-pagination" id="archivesPrevPage">Précédent</button>
+                        <span class="table-pagination-label" id="archivesPageLabel"></span>
+                        <button type="button" class="btn-action btn-secondary btn-pagination" id="archivesNextPage">Suivant</button>
                     </div>
                 </div>
             </section>

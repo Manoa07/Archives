@@ -90,6 +90,12 @@
     color: var(--color-primary);
 }
 
+.table-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin: 12px 0 16px;
+}
+
 .section-subtitle {
     margin: 0 0 16px;
     color: var(--color-muted);
@@ -98,6 +104,24 @@
 .table-scroll {
     width: 100%;
     overflow-x: auto;
+}
+
+.table-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+}
+
+.table-pagination-label {
+    color: var(--color-muted);
+    font-size: 14px;
+}
+
+.btn-pagination {
+    min-width: 120px;
 }
 
 .dashboard-grid {

@@ -61,10 +61,154 @@
         return [...AppState.sacrements];
     }
 
+    // Exporte tout le tableau d'archives au format PDF.
+    function exportArchiveTable() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+        const headers = [
+            'Date',
+            'Nom, prénom',
+            'Parents',
+            'Domicile',
+            'Âge',
+            'Parrain',
+            'Marraine',
+            'Missionnaire',
+            'Sacrement',
+            'Mariage',
+            'Décès',
+            'Numéro'
+        ];
+
+        const rows = getArchiveRecords().map((record, index) => {
+            const isMariage = record.type === SACREMENT_TYPES.MARIAGE;
+
+            return [
+                formatDisplayDate(resolveRecordDate(record)),
+                resolveRecordName(record),
+                resolveParents(record, isMariage),
+                isMariage ? '' : (record.adresse || 'Non precise'),
+                resolveAge(record.date_naissance),
+                resolveParrain(record, isMariage),
+                resolveMarraine(record, isMariage),
+                resolveMissionnaire(record, isMariage),
+                isMariage ? '' : (record.type || 'Non precise'),
+                isMariage ? 'Oui' : '',
+                record.deces || '',
+                String(index + 1)
+            ];
+        });
+
+        const margins = { top: 22, right: 8, bottom: 14, left: 8 };
+        const pageWidth = 297;
+        const pageHeight = 210;
+        const usableWidth = pageWidth - margins.left - margins.right;
+        const colWidths = [18, 33, 36, 25, 14, 24, 24, 26, 22, 14, 19, 12];
+        const headerHeight = 9;
+        const minRowHeight = 8;
+        const lineHeight = 3.7;
+        let y = margins.top;
+
+        const drawPageHeader = (pageNumber, totalPages) => {
+            doc.setTextColor(26, 67, 109);
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(15);
+            doc.text('Archives - tableau complet', margins.left, 11);
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(9);
+            doc.setTextColor(90, 90, 90);
+            doc.text(`Export du ${formatReadableDate(new Date())}`, margins.left, 16);
+            doc.text(`Page ${pageNumber} / ${totalPages}`, pageWidth - margins.right, 11, { align: 'right' });
+
+            doc.setDrawColor(26, 67, 109);
+            doc.setLineWidth(0.3);
+            doc.line(margins.left, 18, pageWidth - margins.right, 18);
+            doc.setTextColor(0, 0, 0);
+        };
+
+        const measureRowHeight = (row) => Math.max(
+            minRowHeight,
+            ...row.map((value, index) => {
+                const lines = doc.splitTextToSize(String(value || ''), colWidths[index] - 2);
+                return lines.length * lineHeight + 3;
+            })
+        );
+
+        const rowsPerPage = [];
+        let currentPageRows = [];
+        let currentY = y;
+        rows.forEach((row) => {
+            const rowHeight = measureRowHeight(row);
+            if (currentY + rowHeight > pageHeight - margins.bottom) {
+                rowsPerPage.push(currentPageRows);
+                currentPageRows = [];
+                currentY = margins.top + headerHeight;
+            }
+            currentPageRows.push({ row, rowHeight });
+            currentY += rowHeight;
+        });
+        if (currentPageRows.length) {
+            rowsPerPage.push(currentPageRows);
+        }
+
+        rowsPerPage.forEach((pageRows, pageIndex) => {
+            if (pageIndex > 0) {
+                doc.addPage();
+            }
+
+            drawPageHeader(pageIndex + 1, rowsPerPage.length);
+
+            let rowY = margins.top + 14;
+            drawTableHeader(rowY);
+            rowY += headerHeight;
+
+            pageRows.forEach(({ row, rowHeight }, rowIndex) => {
+                drawTableRow(row, rowY, rowHeight, rowIndex % 2 === 0);
+                rowY += rowHeight;
+            });
+        });
+
+        doc.save(`archives_tableau_${formatExportDate()}.pdf`);
+
+        function drawTableHeader(headerY) {
+            let x = margins.left;
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(7.5);
+            headers.forEach((header, index) => {
+                doc.setFillColor(26, 67, 109);
+                doc.setTextColor(255, 255, 255);
+                doc.rect(x, headerY, colWidths[index], headerHeight, 'FD');
+                doc.text(headers[index], x + 1, headerY + 5.8);
+                x += colWidths[index];
+            });
+            doc.setTextColor(0, 0, 0);
+            doc.setFont('helvetica', 'normal');
+        }
+
+        function drawTableRow(row, rowY, rowHeight, shaded) {
+            let x = margins.left;
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(7);
+            row.forEach((value, index) => {
+                const cellWidth = colWidths[index];
+                const lines = doc.splitTextToSize(String(value || ''), cellWidth - 2);
+                const fillColor = shaded ? 248 : 255;
+
+                doc.setFillColor(fillColor, fillColor, fillColor);
+                doc.setDrawColor(210, 210, 210);
+                doc.rect(x, rowY, cellWidth, rowHeight, 'FD');
+                doc.text(lines, x + 1, rowY + 4);
+                x += cellWidth;
+            });
+        }
+    }
+
     // Ouvre la section recherche en présélectionnant un type de sacrement.
     function filterByType(type) {
         AppUi.showSection('recherche');
         AppDom.searchInput.value = type;
+        AppUi.setTablePage('results', 1);
         AppUi.renderTable(getFilteredRecords(type));
     }
 
@@ -370,9 +514,111 @@
         return element ? element.value.trim() : '';
     }
 
+    function resolveRecordName(record) {
+        if (record.type === SACREMENT_TYPES.MARIAGE) {
+            return [record.epoux, record.epouse].filter(Boolean).join(' / ') || 'Non precise';
+        }
+
+        return record.interesse || 'Non precise';
+    }
+
+    function resolveRecordDate(record) {
+        return record.date_sacrement || record.date_mariage || 'Non precise';
+    }
+
+    function formatDisplayDate(value) {
+        if (!value || value === 'Non precise') {
+            return 'Non precise';
+        }
+
+        const date = new Date(value);
+
+        if (Number.isNaN(date.getTime())) {
+            return value;
+        }
+
+        return date.toLocaleDateString('fr-FR');
+    }
+
+    function resolveParents(record, isMariage) {
+        if (isMariage) {
+            const temoins = [
+                ...(record.temoinsEpoux || []),
+                ...(record.temoinsEpouse || [])
+            ].filter(Boolean);
+
+            return temoins.join(' / ') || 'Non precise';
+        }
+
+        return [record.pere, record.mere].filter(Boolean).join(' / ') || 'Non precise';
+    }
+
+    function resolveAge(dateNaissance) {
+        if (!dateNaissance) {
+            return '';
+        }
+
+        const birthDate = new Date(dateNaissance);
+
+        if (Number.isNaN(birthDate.getTime())) {
+            return '';
+        }
+
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            age -= 1;
+        }
+
+        return age >= 0 ? `${age} ans` : '';
+    }
+
+    function resolveParrain(record, isMariage) {
+        if (isMariage) {
+            return (record.temoinsEpoux || []).filter(Boolean).join(' / ') || '';
+        }
+
+        return record.parrain || '';
+    }
+
+    function resolveMarraine(record, isMariage) {
+        if (isMariage) {
+            return (record.temoinsEpouse || []).filter(Boolean).join(' / ') || '';
+        }
+
+        return record.marraine || '';
+    }
+
+    function resolveMissionnaire(record, isMariage) {
+        if (isMariage) {
+            return record.missionnaire || '';
+        }
+
+        return record.mon_pere || 'Non precise';
+    }
+
+    function formatExportDate() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    function formatReadableDate(date) {
+        return date.toLocaleDateString('fr-FR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+    }
+
     global.AppRecords = {
         refreshData,
         getArchiveRecords,
+        exportArchiveTable,
         getFilteredRecords,
         getAllRecords,
         filterByType,
