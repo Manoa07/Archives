@@ -53,16 +53,17 @@
     // Fusionne les sacrements et les mariages dans une seule liste exploitable par l'UI.
     function getAllRecords() {
         return [...AppState.sacrements, ...AppState.mariages]
-            .sort((left, right) => compareRecordDates(right, left));
+            .sort(compareRecordDates);
     }
 
     // Retourne les archives dans l'ordre d'insertion renvoyé par la base.
     function getArchiveRecords() {
-        return [...AppState.sacrements];
+        return [...AppState.sacrements].sort(compareRecordDates);
     }
 
     // Exporte tout le tableau d'archives au format PDF.
     function exportArchiveTable() {
+        const records = getArchiveRecords();
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
         const headers = [
@@ -80,7 +81,7 @@
             'Numéro'
         ];
 
-        const rows = getArchiveRecords().map((record, index) => {
+        const rows = records.map((record, index) => {
             const isMariage = record.type === SACREMENT_TYPES.MARIAGE;
 
             return [
@@ -456,6 +457,14 @@
     function compareRecordDates(left, right) {
         const leftTime = toTimestamp(left.date_sacrement || left.date_mariage);
         const rightTime = toTimestamp(right.date_sacrement || right.date_mariage);
+
+        if (!leftTime && rightTime) {
+            return 1;
+        }
+
+        if (leftTime && !rightTime) {
+            return -1;
+        }
 
         return leftTime - rightTime;
     }

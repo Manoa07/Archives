@@ -126,8 +126,12 @@
 
 .dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+}
+
+.dashboard-grid .stat-card {
+    min-width: 0;
 }
 
 .section-list {
