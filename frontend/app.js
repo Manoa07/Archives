@@ -16,6 +16,8 @@
     // Branche tous les événements utilisateur sur les handlers applicatifs.
     function bindEvents() {
         AppDom.loginForm.addEventListener('submit', handleLoginSubmit);
+        AppDom.passwordForm.addEventListener('submit', handlePasswordChangeSubmit);
+        AppDom.logoutButton.addEventListener('click', handleLogoutClick);
         AppDom.mariageForm.addEventListener('submit', handleMariageSubmit);
         AppDom.sacrementForm.addEventListener('submit', handleSacrementSubmit);
         AppDom.editSacrementForm.addEventListener('submit', handleEditSacrementSubmit);
@@ -88,6 +90,49 @@
         }
     }
 
+    async function handlePasswordChangeSubmit(event) {
+        event.preventDefault();
+        const submitButton = event.submitter;
+        AppUi.setButtonLoading(submitButton, true);
+
+        if (AppDom.newPassword.value !== AppDom.confirmPassword.value) {
+            AppUi.showToast('La confirmation du mot de passe est différente.', 'error');
+            AppUi.setButtonLoading(submitButton, false);
+            return;
+        }
+
+        try {
+            await AppApi.apiRequest('/api/admin-password', {
+                method: 'PUT',
+                body: {
+                    currentPassword: AppDom.currentPassword.value,
+                    newPassword: AppDom.newPassword.value
+                }
+            });
+
+            AppDom.currentPassword.value = '';
+            AppDom.newPassword.value = '';
+            AppDom.confirmPassword.value = '';
+            AppUi.showToast('Mot de passe modifié avec succès.');
+        } catch (error) {
+            AppUi.showToast(error.message || 'Erreur lors de la modification du mot de passe.', 'error');
+        } finally {
+            AppUi.setButtonLoading(submitButton, false);
+        }
+    }
+
+    async function handleLogoutClick() {
+        try {
+            await AppApi.apiRequest('/api/logout', {
+                method: 'POST'
+            });
+
+            AppUi.setAuthenticated(false);
+        } catch (error) {
+            AppUi.showToast(error.message || 'Erreur lors de la déconnexion.', 'error');
+        }
+    }
+
     // Construit puis envoie un enregistrement de mariage au backend.
     async function handleMariageSubmit(event) {
         event.preventDefault();
@@ -96,8 +141,13 @@
 
         const payload = {
             type: SACREMENT_TYPES.MARIAGE,
+            numero: getValue('mariage-numero'),
             epoux: getValue('mariage-epoux'),
             epouse: getValue('mariage-epouse'),
+            pere_epoux: getValue('mariage-pere-epoux'),
+            mere_epoux: getValue('mariage-mere-epoux'),
+            pere_epouse: getValue('mariage-pere-epouse'),
+            mere_epouse: getValue('mariage-mere-epouse'),
             temoinsEpoux: [
                 getValue('mariage-temoin-epoux-1'),
                 getValue('mariage-temoin-epoux-2')
@@ -108,7 +158,10 @@
             ],
             date_mariage: getValue('mariage-date'),
             missionnaire: getValue('mariage-missionnaire'),
-            lieu: getValue('mariage-lieu')
+            lieu: getValue('mariage-lieu'),
+            civil_numero: getValue('mariage-civil-numero'),
+            civil_date: getValue('mariage-civil-date'),
+            civil_lieu: getValue('mariage-civil-lieu')
         };
 
         try {
@@ -132,6 +185,7 @@
 
         const payload = {
             type: getValue('sacrement-type'),
+            numero: getValue('sacrement-numero'),
             interesse: getValue('sacrement-interesse'),
             date_naissance: getValue('sacrement-date-naissance'),
             pere: getValue('sacrement-pere'),

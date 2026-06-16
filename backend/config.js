@@ -36,6 +36,7 @@ loadEnvFile();
 const PORT = Number(process.env.PORT) || 3000;
 const SESSION_SECRET = process.env.SESSION_SECRET;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+const ADMIN_PASSWORD_FILE = path.join(__dirname, '..', 'admin-password.json');
 const ROOT_DIR = path.join(__dirname, '..');
 
 // Vérifie que les variables critiques existent avant de démarrer le serveur.
@@ -50,6 +51,7 @@ function validateConfig() {
 
 module.exports = {
     ADMIN_PASSWORD,
+    ADMIN_PASSWORD_FILE,
     PORT,
     ROOT_DIR,
     SESSION_SECRET,

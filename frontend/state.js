@@ -10,7 +10,8 @@ window.AppState = {
     deleteTargetType: null,
     tablePages: {
         results: 1,
-        archives: 1
+        archives: 1,
+        archiveMariage: 1
     }
 };
 

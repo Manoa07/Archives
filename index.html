@@ -39,30 +39,60 @@
             <button class="nav-btn" data-section-target="mariage" type="button">MARIAGE</button>
             <button class="nav-btn" data-section-target="recherche" type="button">RECHERCHER</button>
             <button class="nav-btn" data-section-target="archive" type="button">ARCHIVES</button>
+            <button class="nav-btn" data-section-target="archive-mariage" type="button">ARCHIVE MARIAGE</button>
         </nav>
 
         <main id="main-content">
             <section id="accueil" class="content-section active">
                 <div class="cards-container">
                     <div class="card">
-                        <div class="icon">👤</div>
+                        <div class="icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" role="img" focusable="false">
+                                <path d="M20 21a8 8 0 0 0-16 0" />
+                                <circle cx="12" cy="8" r="4" />
+                            </svg>
+                        </div>
                         <p>MARIAGE</p>
                         <button type="button" class="btn-action" data-dashboard-target="mariage">ENREGISTRER</button>
                     </div>
                     <div class="card">
-                        <div class="icon">🕊️</div>
+                        <div class="icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" role="img" focusable="false">
+                                <path d="M4 13c2.5-1.5 4.5-4 6-7 0 0 2 2 2 5 0 2-1 3-1 3s2-1 5-1c1.5 0 3 .5 4 1.5-1 1-2.5 1.5-4 1.5-2 0-3.5-.5-5-.5-1.5 0-3.5.5-7 2 0 0 0-2 0-4.5Z" />
+                                <path d="M9 14c.5 1.5 1.5 3 3 4.5" />
+                            </svg>
+                        </div>
                         <p>SACREMENT</p>
                         <button type="button" class="btn-action" data-dashboard-target="sacrement">ENREGISTRER</button>
                     </div>
                     <div class="card">
-                        <div class="icon">🔍</div>
+                        <div class="icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" role="img" focusable="false">
+                                <circle cx="11" cy="11" r="6" />
+                                <path d="m20 20-3.5-3.5" />
+                            </svg>
+                        </div>
                         <p>RECHERCHER</p>
                         <button type="button" class="btn-action" data-dashboard-target="recherche">RECHERCHER</button>
                     </div>
                     <div class="card">
-                        <div class="icon">📁</div>
+                        <div class="icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" role="img" focusable="false">
+                                <path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" />
+                            </svg>
+                        </div>
                         <p>ARCHIVES</p>
                         <button type="button" class="btn-action" data-dashboard-target="archive">VOIR</button>
+                    </div>
+                    <div class="card card-security">
+                        <div class="icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" role="img" focusable="false">
+                                <rect x="5" y="11" width="14" height="10" rx="2" />
+                                <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+                            </svg>
+                        </div>
+                        <p>SÉCURITÉ</p>
+                        <button type="button" class="btn-action" data-section-target="securite">GÉRER</button>
                     </div>
                 </div>
                 <div class="dashboard-container">
@@ -90,7 +120,11 @@
                             </div>
                         </button>
                         <button class="stat-card cliquable" type="button" data-filter-type="Confirmation">
-                            <span class="stat-emoji" aria-hidden="true">✝️</span>
+                            <span class="stat-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" role="img" focusable="false">
+                                    <path d="M11 3h2v6h4v2h-4v10h-2V11H7V9h4V3Z" />
+                                </svg>
+                            </span>
                             <div class="stat-content">
                                 <span class="stat-number" id="nb-confirmation">0</span>
                                 <span class="stat-label">Confirmations</span>
@@ -106,33 +140,86 @@
                     </div>
                 </div>
             </section>
+            <section id="securite" class="content-section">
+                <div class="dashboard-container">
+                    <h3 class="dashboard-title">Sécurité</h3>
+                    <form id="password-form" class="app-form">
+                        <div class="form-grid form-grid-two">
+                            <div class="field-group">
+                                <label for="current-password">Mot de passe actuel</label>
+                                <input type="password" id="current-password" autocomplete="current-password" required>
+                            </div>
+                            <div class="field-group">
+                                <label for="new-password">Nouveau mot de passe</label>
+                                <input type="password" id="new-password" autocomplete="new-password" required>
+                            </div>
+                            <div class="field-group field-group-full">
+                                <label for="confirm-password">Confirmer le nouveau mot de passe</label>
+                                <input type="password" id="confirm-password" autocomplete="new-password" required>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn-action" id="password-submit">MODIFIER LE MOT DE PASSE</button>
+                            <button type="button" class="btn-action btn-secondary" id="logout-button">DÉCONNEXION</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
             <section id="mariage" class="content-section">
                 <form id="mariage-form" class="app-form mariage-form">
                     <h3 id="mariage-form-title">ENREGISTRER UN MARIAGE</h3>
                     <div class="form-grid form-grid-two">
-                        <div class="field-group">
-                            <label for="mariage-epoux">Époux</label>
-                            <input type="text" id="mariage-epoux" placeholder="Nom de l'époux" required>
+                        <div class="field-group field-group-full">
+                            <div class="form-grid form-grid-two">
+                                <div class="field-group">
+                                    <label for="mariage-epoux">Époux</label>
+                                    <input type="text" id="mariage-epoux" placeholder="Nom de l'époux" required>
+                                </div>
+                                <div class="field-group">
+                                    <label for="mariage-epouse">Épouse</label>
+                                    <input type="text" id="mariage-epouse" placeholder="Nom de l'épouse" required>
+                                </div>
+                            </div>
                         </div>
                         <div class="field-group">
-                            <label for="mariage-epouse">Épouse</label>
-                            <input type="text" id="mariage-epouse" placeholder="Nom de l'épouse" required>
+                            <label for="mariage-pere-epoux">Père de l'époux</label>
+                            <input type="text" id="mariage-pere-epoux" placeholder="Nom du père" autocomplete="off">
                         </div>
                         <div class="field-group">
-                            <label for="mariage-temoin-epoux-1">Témoin époux 1</label>
-                            <input type="text" id="mariage-temoin-epoux-1" placeholder="Premier témoin" required>
+                            <label for="mariage-pere-epouse">Père de l'épouse</label>
+                            <input type="text" id="mariage-pere-epouse" placeholder="Nom du père" autocomplete="off">
                         </div>
                         <div class="field-group">
-                            <label for="mariage-temoin-epoux-2">Témoin époux 2</label>
-                            <input type="text" id="mariage-temoin-epoux-2" placeholder="Second témoin" required>
+                            <label for="mariage-mere-epoux">Mère de l'époux</label>
+                            <input type="text" id="mariage-mere-epoux" placeholder="Nom de la mère" autocomplete="off">
                         </div>
                         <div class="field-group">
-                            <label for="mariage-temoin-epouse-1">Témoin épouse 1</label>
-                            <input type="text" id="mariage-temoin-epouse-1" placeholder="Premier témoin" required>
+                            <label for="mariage-mere-epouse">Mère de l'épouse</label>
+                            <input type="text" id="mariage-mere-epouse" placeholder="Nom de la mère" autocomplete="off">
                         </div>
                         <div class="field-group">
-                            <label for="mariage-temoin-epouse-2">Témoin épouse 2</label>
-                            <input type="text" id="mariage-temoin-epouse-2" placeholder="Second témoin" required>
+                            <div class="form-grid">
+                                <div class="field-group">
+                                    <label for="mariage-temoin-epoux-1">Témoin époux 1</label>
+                                    <input type="text" id="mariage-temoin-epoux-1" placeholder="Premier témoin" required>
+                                </div>
+                                <div class="field-group">
+                                    <label for="mariage-temoin-epoux-2">Témoin époux 2</label>
+                                    <input type="text" id="mariage-temoin-epoux-2" placeholder="Second témoin" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="field-group">
+                            <div class="form-grid">
+                                <div class="field-group">
+                                    <label for="mariage-temoin-epouse-1">Témoin épouse 1</label>
+                                    <input type="text" id="mariage-temoin-epouse-1" placeholder="Premier témoin" required>
+                                </div>
+                                <div class="field-group">
+                                    <label for="mariage-temoin-epouse-2">Témoin épouse 2</label>
+                                    <input type="text" id="mariage-temoin-epouse-2" placeholder="Second témoin" required>
+                                </div>
+                            </div>
                         </div>
                         <div class="field-group">
                             <label for="mariage-date">Date du mariage</label>
@@ -145,6 +232,27 @@
                         <div class="field-group field-group-full">
                             <label for="mariage-lieu">Lieu</label>
                             <input type="text" id ="mariage-lieu" placeholder="Lieu de célébration" required>
+                        </div>
+                        <div class="field-group field-group-full">
+                            <label>Mariage civil</label>
+                            <div class="form-grid form-grid-three">
+                                <div class="field-group">
+                                    <label for="mariage-civil-numero">Numéro</label>
+                                    <input type="text" id="mariage-civil-numero" placeholder="Numéro civil" autocomplete="off">
+                                </div>
+                                <div class="field-group">
+                                    <label for="mariage-civil-date">Date</label>
+                                    <input type="date" id="mariage-civil-date" autocomplete="off">
+                                </div>
+                                <div class="field-group">
+                                    <label for="mariage-civil-lieu">Lieu</label>
+                                    <input type="text" id="mariage-civil-lieu" placeholder="Lieu civil" autocomplete="off">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="field-group field-group-full">
+                            <label for="mariage-numero">Numéro</label>
+                            <input type="number" id="mariage-numero" placeholder="Numéro du mariage" inputmode="numeric" autocomplete="off">
                         </div>
                     </div>
                     <div class="form-actions">
@@ -207,6 +315,10 @@
                             <label for="sacrement-celebrant">Célébrant</label>
                             <input type="text" id="sacrement-celebrant" placeholder="Nom du célébrant" name="mopera" class="half-width" autocomplete="off">
                         </div>
+                        <div class="field-group field-group-full">
+                            <label for="sacrement-numero">Numéro</label>
+                            <input type="number" id="sacrement-numero" placeholder="Numéro du sacrement" inputmode="numeric" autocomplete="off">
+                        </div>
                     </div>
                     <div class="form-actions">
                         <button class="btn-action" id="sacrement-submit" type="submit">ENREGISTRER LE SACREMENT</button>
@@ -254,7 +366,7 @@
                                     <th>Nom, prénom</th>
                                     <th>Parents</th>
                                     <th>Domicile</th>
-                                    <th>Âge</th>
+                                    <th>Date de naissance</th>
                                     <th>Parrain</th>
                                     <th>Marraine</th>
                                     <th>Missionnaire</th>
@@ -271,6 +383,34 @@
                         <button type="button" class="btn-action btn-secondary btn-pagination" id="archivesPrevPage">Précédent</button>
                         <span class="table-pagination-label" id="archivesPageLabel"></span>
                         <button type="button" class="btn-action btn-secondary btn-pagination" id="archivesNextPage">Suivant</button>
+                    </div>
+                </div>
+            </section>
+            <section id="archive-mariage" class="content-section">
+                <div class="archives-container">
+                    <h3>Archive mariage</h3>
+                    <p class="section-subtitle">Liste des mariages avec leur numéro d'enregistrement.</p>
+                    <div class="table-scroll">
+                        <table id="archiveMariageTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Numéro</th>
+                                    <th>Nom, prénom</th>
+                                    <th>Parents</th>
+                                    <th>Témoin époux</th>
+                                    <th>Témoin épouse</th>
+                                    <th>Célébrant</th>
+                                    <th>Lieu</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="table-pagination" id="archiveMariagePager" hidden>
+                        <button type="button" class="btn-action btn-secondary btn-pagination" id="archiveMariagePrevPage">Précédent</button>
+                        <span class="table-pagination-label" id="archiveMariagePageLabel"></span>
+                        <button type="button" class="btn-action btn-secondary btn-pagination" id="archiveMariageNextPage">Suivant</button>
                     </div>
                 </div>
             </section>
@@ -357,6 +497,10 @@
                         <label for="edit-sacrement-celebrant">Célébrant</label>
                         <input type="text" id="edit-sacrement-celebrant" placeholder="Nom du célébrant" autocomplete="off">
                     </div>
+                    <div class="field-group field-group-full">
+                        <label for="edit-sacrement-numero">Numéro</label>
+                        <input type="number" id="edit-sacrement-numero" placeholder="Numéro du sacrement" inputmode="numeric" autocomplete="off">
+                    </div>
                 </div>
                 <div class="form-actions">
                     <button type="submit" id="edit-sacrement-submit" class="btn-action">Enregistrer le sacrement</button>
@@ -378,13 +522,33 @@
             </div>
             <form id="edit-mariage-form" class="edit-modal-form">
                 <div class="edit-fields form-grid form-grid-two">
-                    <div class="field-group">
-                        <label for="edit-mariage-epoux">Époux</label>
-                        <input type="text" id="edit-mariage-epoux" placeholder="Nom de l'époux" required>
+                    <div class="field-group field-group-full">
+                        <div class="form-grid form-grid-two">
+                            <div class="field-group">
+                                <label for="edit-mariage-epoux">Époux</label>
+                                <input type="text" id="edit-mariage-epoux" placeholder="Nom de l'époux" required>
+                            </div>
+                            <div class="field-group">
+                                <label for="edit-mariage-epouse">Épouse</label>
+                                <input type="text" id="edit-mariage-epouse" placeholder="Nom de l'épouse" required>
+                            </div>
+                        </div>
                     </div>
                     <div class="field-group">
-                        <label for="edit-mariage-epouse">Épouse</label>
-                        <input type="text" id="edit-mariage-epouse" placeholder="Nom de l'épouse" required>
+                        <label for="edit-mariage-pere-epoux">Père de l'époux</label>
+                        <input type="text" id="edit-mariage-pere-epoux" placeholder="Nom du père" autocomplete="off">
+                    </div>
+                    <div class="field-group">
+                        <label for="edit-mariage-pere-epouse">Père de l'épouse</label>
+                        <input type="text" id="edit-mariage-pere-epouse" placeholder="Nom du père" autocomplete="off">
+                    </div>
+                    <div class="field-group">
+                        <label for="edit-mariage-mere-epoux">Mère de l'époux</label>
+                        <input type="text" id="edit-mariage-mere-epoux" placeholder="Nom de la mère" autocomplete="off">
+                    </div>
+                    <div class="field-group">
+                        <label for="edit-mariage-mere-epouse">Mère de l'épouse</label>
+                        <input type="text" id="edit-mariage-mere-epouse" placeholder="Nom de la mère" autocomplete="off">
                     </div>
                     <div class="field-group">
                         <label for="edit-mariage-temoin-epoux-1">Témoin époux 1</label>
@@ -413,6 +577,27 @@
                     <div class="field-group field-group-full">
                         <label for="edit-mariage-lieu">Lieu</label>
                         <input type="text" id="edit-mariage-lieu" placeholder="Lieu de célébration" required>
+                    </div>
+                    <div class="field-group field-group-full">
+                        <label>Mariage civil</label>
+                        <div class="form-grid form-grid-three">
+                            <div class="field-group">
+                                <label for="edit-mariage-civil-numero">Numéro</label>
+                                <input type="text" id="edit-mariage-civil-numero" placeholder="Numéro civil" autocomplete="off">
+                            </div>
+                            <div class="field-group">
+                                <label for="edit-mariage-civil-date">Date</label>
+                                <input type="date" id="edit-mariage-civil-date" autocomplete="off">
+                            </div>
+                            <div class="field-group">
+                                <label for="edit-mariage-civil-lieu">Lieu</label>
+                                <input type="text" id="edit-mariage-civil-lieu" placeholder="Lieu civil" autocomplete="off">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field-group field-group-full">
+                        <label for="edit-mariage-numero">Numéro</label>
+                        <input type="number" id="edit-mariage-numero" placeholder="Numéro du mariage" inputmode="numeric" autocomplete="off">
                     </div>
                 </div>
                 <div class="form-actions">

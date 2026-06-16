@@ -17,6 +17,7 @@
             AppUi.renderDashboard(getAllRecords());
             AppUi.renderTable(getFilteredRecords(AppDom.searchInput.value));
             AppUi.renderArchives(getArchiveRecords());
+            AppUi.renderArchiveMariage(getArchiveMariageRecords());
         } catch (error) {
             if (error.status === 403) {
                 AppUi.setAuthenticated(false);
@@ -58,7 +59,12 @@
 
     // Retourne les archives dans l'ordre d'insertion renvoyé par la base.
     function getArchiveRecords() {
-        return [...AppState.sacrements].sort(compareRecordDates);
+        return [...AppState.sacrements].sort(compareArchiveRecords);
+    }
+
+    // Retourne les mariages à afficher dans la section archive mariage.
+    function getArchiveMariageRecords() {
+        return [...AppState.mariages].sort(compareRecordDates);
     }
 
     // Exporte tout le tableau d'archives au format PDF.
@@ -71,7 +77,7 @@
             'Nom, prénom',
             'Parents',
             'Domicile',
-            'Âge',
+            'Date de naissance',
             'Parrain',
             'Marraine',
             'Missionnaire',
@@ -89,14 +95,14 @@
                 resolveRecordName(record),
                 resolveParents(record, isMariage),
                 isMariage ? '' : (record.adresse || 'Non precise'),
-                resolveAge(record.date_naissance),
+                resolveBirthDate(record),
                 resolveParrain(record, isMariage),
                 resolveMarraine(record, isMariage),
                 resolveMissionnaire(record, isMariage),
                 isMariage ? '' : (record.type || 'Non precise'),
                 isMariage ? 'Oui' : '',
                 record.deces || '',
-                String(index + 1)
+                record.numero || String(index + 1)
             ];
         });
 
@@ -290,6 +296,7 @@
 
         await updateSacrement(AppState.editingRecordId, {
             type: getInputValue('edit-sacrement-type'),
+            numero: getInputValue('edit-sacrement-numero'),
             interesse: getInputValue('edit-sacrement-interesse'),
             date_naissance: getInputValue('edit-sacrement-date-naissance'),
             pere: getInputValue('edit-sacrement-pere'),
@@ -311,8 +318,13 @@
 
         await updateMariage(AppState.editingRecordId, {
             type: SACREMENT_TYPES.MARIAGE,
+            numero: getInputValue('edit-mariage-numero'),
             epoux: getInputValue('edit-mariage-epoux'),
             epouse: getInputValue('edit-mariage-epouse'),
+            pere_epoux: getInputValue('edit-mariage-pere-epoux'),
+            mere_epoux: getInputValue('edit-mariage-mere-epoux'),
+            pere_epouse: getInputValue('edit-mariage-pere-epouse'),
+            mere_epouse: getInputValue('edit-mariage-mere-epouse'),
             temoinsEpoux: [
                 getInputValue('edit-mariage-temoin-epoux-1'),
                 getInputValue('edit-mariage-temoin-epoux-2')
@@ -323,7 +335,10 @@
             ],
             date_mariage: getInputValue('edit-mariage-date'),
             missionnaire: getInputValue('edit-mariage-missionnaire'),
-            lieu: getInputValue('edit-mariage-lieu')
+            lieu: getInputValue('edit-mariage-lieu'),
+            civil_numero: getInputValue('edit-mariage-civil-numero'),
+            civil_date: getInputValue('edit-mariage-civil-date'),
+            civil_lieu: getInputValue('edit-mariage-civil-lieu')
         });
     }
 
@@ -363,6 +378,7 @@
         doc.setFont('Times New Roman');
         doc.setFontSize(15);
         doc.text('EKAR MD JEROME Anosibe', 95, 45, { align: 'right' });
+        doc.text('Distrika MAHAMASINA', 86, 52, { align: 'right' });
         doc.setFontSize(19);
         doc.text('FANAMARINANA NY NAHAVITANA BATEMY', 105, 65, { align: 'center' });
         doc.setFontSize(16);
@@ -399,6 +415,7 @@
         doc.setFont('Times New Roman');
         doc.setFontSize(15);
         doc.text('EKAR MD JEROME Anosibe', 95, 45, { align: 'right' });
+        doc.text('Distrika MAHAMASINA', 86, 52, { align: 'right' });
         doc.setFontSize(19);
         doc.text('FANAMARINANA', 105, 65, { align: 'center' });
         doc.setFontSize(16);
@@ -406,6 +423,8 @@
         const lines = [
             ['Andriamtoa', record.epoux],
             ['Ramatoa', record.epouse],
+            ['Rain-dahy', [record.pere_epoux, record.pere_epouse].filter(Boolean).join(' / ')],
+            ['Reny', [record.mere_epoux, record.mere_epouse].filter(Boolean).join(' / ')],
             ['dia efa nandray ny SAKRAMENTA ny', 'Mariazy'],
             ["Teto",record.lieu],
             ['Tamin ny', record.date_mariage],
@@ -430,6 +449,7 @@
         doc.setFont('Times New Roman');
         doc.setFontSize(15);
         doc.text('EKAR MD JEROME Anosibe', 95, 45, { align: 'right' });
+        doc.text('Distrika MAHAMASINA', 86, 52, { align: 'right' });
         doc.setFontSize(19);
         doc.text('FANAMARINANA', 105, 65, { align: 'center' });
         doc.setFontSize(16);
@@ -451,6 +471,28 @@
         doc.setFontSize(14);
         doc.text("Ny PRETRA", 120, 170);
         doc.save(`Fanamarinana_${record.type || 'certificat'}_${record.interesse || 'certificat'}.pdf`);
+    }
+
+    // Compare deux enregistrements selon leur date métier pour garder un affichage stable.
+    function compareArchiveRecords(left, right) {
+        const leftPriority = getArchivePriority(left);
+        const rightPriority = getArchivePriority(right);
+
+        if (leftPriority !== rightPriority) {
+            return leftPriority - rightPriority;
+        }
+
+        return compareRecordDates(left, right);
+    }
+
+    // Place les baptêmes avant les autres sacrements dans l'affichage des archives.
+    function getArchivePriority(record) {
+        return record.type === SACREMENT_TYPES.BAPTEME ? 0 : 1;
+    }
+
+    // Retourne la date de naissance enregistrée, ou un libellé explicite si absente.
+    function resolveBirthDate(record) {
+        return record.date_naissance || 'Non precise';
     }
 
     // Compare deux enregistrements selon leur date métier pour garder un affichage stable.
@@ -486,7 +528,12 @@
 
     function fillMariageEditForm(record) {
         setValue('edit-mariage-epoux', record.epoux);
+        setValue('edit-mariage-numero', record.numero);
         setValue('edit-mariage-epouse', record.epouse);
+        setValue('edit-mariage-pere-epoux', record.pere_epoux);
+        setValue('edit-mariage-mere-epoux', record.mere_epoux);
+        setValue('edit-mariage-pere-epouse', record.pere_epouse);
+        setValue('edit-mariage-mere-epouse', record.mere_epouse);
         setValue('edit-mariage-temoin-epoux-1', record.temoinsEpoux?.[0]);
         setValue('edit-mariage-temoin-epoux-2', record.temoinsEpoux?.[1]);
         setValue('edit-mariage-temoin-epouse-1', record.temoinsEpouse?.[0]);
@@ -494,10 +541,14 @@
         setValue('edit-mariage-date', record.date_mariage);
         setValue('edit-mariage-missionnaire', record.missionnaire);
         setValue('edit-mariage-lieu', record.lieu);
+        setValue('edit-mariage-civil-numero', record.civil_numero);
+        setValue('edit-mariage-civil-date', record.civil_date);
+        setValue('edit-mariage-civil-lieu', record.civil_lieu);
     }
 
     function fillSacrementEditForm(record) {
         setValue('edit-sacrement-type', record.type);
+        setValue('edit-sacrement-numero', record.numero);
         setValue('edit-sacrement-interesse', record.interesse);
         setValue('edit-sacrement-date-naissance', record.date_naissance);
         setValue('edit-sacrement-pere', record.pere);
@@ -551,12 +602,14 @@
 
     function resolveParents(record, isMariage) {
         if (isMariage) {
-            const temoins = [
-                ...(record.temoinsEpoux || []),
-                ...(record.temoinsEpouse || [])
+            const parents = [
+                record.pere_epoux,
+                record.mere_epoux,
+                record.pere_epouse,
+                record.mere_epouse
             ].filter(Boolean);
 
-            return temoins.join(' / ') || 'Non precise';
+            return parents.join(' / ') || 'Non precise';
         }
 
         return [record.pere, record.mere].filter(Boolean).join(' / ') || 'Non precise';

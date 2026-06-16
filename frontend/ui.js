@@ -144,6 +144,20 @@
         });
     }
 
+    // Rend la section archive dédiée aux mariages.
+    function renderArchiveMariage(records) {
+        renderPaginatedRecords({
+            tbody: AppDom.archiveMariageBody,
+            pager: AppDom.archiveMariagePager,
+            prevButton: AppDom.archiveMariagePrevPage,
+            nextButton: AppDom.archiveMariageNextPage,
+            label: AppDom.archiveMariagePageLabel,
+            records,
+            mode: 'archiveMariage',
+            pageKey: 'archiveMariage'
+        });
+    }
+
     function renderPaginatedRecords({ tbody, pager, prevButton, nextButton, label, records, mode, pageKey }) {
         if (!tbody) {
             return;
@@ -160,8 +174,12 @@
         if (!records.length) {
             const row = document.createElement('tr');
             const cell = document.createElement('td');
-            cell.colSpan = mode === 'archives' ? 12 : 4;
-            cell.textContent = mode === 'archives' ? 'Aucune archive disponible.' : 'Aucun résultat.';
+            cell.colSpan = mode === 'archives' ? 12 : mode === 'archiveMariage' ? 8 : 4;
+            cell.textContent = mode === 'archives'
+                ? 'Aucune archive disponible.'
+                : mode === 'archiveMariage'
+                    ? 'Aucun mariage disponible.'
+                    : 'Aucun résultat.';
             cell.className = 'empty-cell';
             row.appendChild(cell);
             tbody.appendChild(row);
@@ -178,14 +196,29 @@
                 row.appendChild(createCell(resolveRecordName(record)));
                 row.appendChild(createCell(resolveParents(record, isMariage)));
                 row.appendChild(createCell(isMariage ? '' : (record.adresse || 'Non precise')));
-                row.appendChild(createCell(resolveAge(record.date_naissance)));
+                row.appendChild(createCell(resolveBirthDate(record)));
                 row.appendChild(createCell(resolveParrain(record, isMariage)));
                 row.appendChild(createCell(resolveMarraine(record, isMariage)));
                 row.appendChild(createCell(resolveMissionnaire(record, isMariage)));
                 row.appendChild(createCell(isMariage ? '' : (record.type || 'Non precise')));
                 row.appendChild(createCell(isMariage ? 'Oui' : ''));
                 row.appendChild(createCell(record.deces || ''));
-                row.appendChild(createCell(String(startIndex + index + 1)));
+                row.appendChild(createCell(resolveRecordNumero(record, startIndex + index + 1)));
+
+                tbody.appendChild(row);
+            });
+        } else if (mode === 'archiveMariage') {
+            pageRecords.forEach((record, index) => {
+                const row = document.createElement('tr');
+
+                row.appendChild(createCell(formatDisplayDate(resolveRecordDate(record))));
+                row.appendChild(createCell(resolveRecordNumero(record)));
+                row.appendChild(createCell(resolveRecordName(record)));
+                row.appendChild(createCell(resolveParents(record, true)));
+                row.appendChild(createCell((record.temoinsEpoux || []).filter(Boolean).join(' / ') || 'Non precise'));
+                row.appendChild(createCell((record.temoinsEpouse || []).filter(Boolean).join(' / ') || 'Non precise'));
+                row.appendChild(createCell(resolveMissionnaire(record, true)));
+                row.appendChild(createCell(record.lieu || 'Non precise'));
 
                 tbody.appendChild(row);
             });
@@ -399,6 +432,16 @@
         return record.mon_pere || 'Non precise';
     }
 
+    // Retourne la date de naissance affichable selon le type d'enregistrement.
+    function resolveBirthDate(record) {
+        return record.date_naissance || 'Non precise';
+    }
+
+    // Retourne le numéro enregistré, avec un fallback stable pour les anciennes données.
+    function resolveRecordNumero(record, fallback = 'Non precise') {
+        return record.numero || fallback;
+    }
+
     global.AppUi = {
         showSection,
         setAuthenticated,
@@ -411,6 +454,7 @@
         renderDashboard,
         renderTable,
         renderArchives,
+        renderArchiveMariage,
         setTablePage,
         goToTablePage,
         resolveRecordName,
