@@ -100,7 +100,7 @@
                 resolveMarraine(record, isMariage),
                 resolveMissionnaire(record, isMariage),
                 isMariage ? '' : (record.type || 'Non precise'),
-                isMariage ? 'Oui' : '',
+                AppUi.resolveMariageInfo(record),
                 record.deces || '',
                 record.numero || String(index + 1)
             ];

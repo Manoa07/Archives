@@ -201,7 +201,7 @@
                 row.appendChild(createCell(resolveMarraine(record, isMariage)));
                 row.appendChild(createCell(resolveMissionnaire(record, isMariage)));
                 row.appendChild(createCell(isMariage ? '' : (record.type || 'Non precise')));
-                row.appendChild(createCell(isMariage ? 'Oui' : ''));
+                row.appendChild(createCell(resolveMariageInfo(record)));
                 row.appendChild(createCell(record.deces || ''));
                 row.appendChild(createCell(resolveRecordNumero(record, startIndex + index + 1)));
 
@@ -442,6 +442,98 @@
         return record.numero || fallback;
     }
 
+    // Compare les informations de la base mariages pour afficher le nom du conjoint
+    // dans la colonne "Mariage" de la section Archives.
+    // Étape 1 : le nom de l'interesse doit correspondre à l'époux ou l'épouse.
+    // Étape 2 : les parents fortifient la correspondance (si un seul parent est
+    // renseigné dans le mariage suite à un décès, on compare juste ce parent).
+    function resolveMariageInfo(record) {
+        if (record.type === SACREMENT_TYPES.MARIAGE) {
+            return 'Oui';
+        }
+
+        const interesse = (record.interesse || '').trim().toUpperCase();
+        const pere = (record.pere || '').trim().toUpperCase();
+        const mere = (record.mere || '').trim().toUpperCase();
+
+        if (!interesse) {
+            return '';
+        }
+
+        // Étape 1 : trouver les mariages où le nom de l'interesse correspond
+        // exactement à l'époux ou à l'épouse.
+        const mariagesCandidats = AppState.mariages.filter((mariage) => {
+            const epoux = (mariage.epoux || '').trim().toUpperCase();
+            const epouse = (mariage.epouse || '').trim().toUpperCase();
+
+            return epoux === interesse || epouse === interesse;
+        });
+
+        if (!mariagesCandidats.length) {
+            return '';
+        }
+
+        // Étape 2 : fortifier la correspondance avec les parents.
+        // On cherche un mariage candidat dont les parents correspondent aussi.
+        // Si c'est l'époux qui correspond au nom, on compare avec les parents de l'époux.
+        // Si c'est l'épouse qui correspond au nom, on compare avec les parents de l'épouse.
+        let mariageTrouve = mariagesCandidats.find((mariage) => {
+            const epoux = (mariage.epoux || '').trim().toUpperCase();
+            const epouse = (mariage.epouse || '').trim().toUpperCase();
+
+            if (epoux === interesse) {
+                return parentsCorrespondent(pere, mere, mariage.pere_epoux, mariage.mere_epoux);
+            }
+
+            return parentsCorrespondent(pere, mere, mariage.pere_epouse, mariage.mere_epouse);
+        });
+
+        // Si aucun candidat ne correspond par les parents, on garde le premier candidat
+        // (le nom est la base de la correspondance, les parents servent à fortifier).
+        if (!mariageTrouve) {
+            mariageTrouve = mariagesCandidats[0];
+        }
+
+        // Affiche le nom du conjoint (l'autre personne du mariage).
+        const epoux = (mariageTrouve.epoux || '').trim();
+        const epouse = (mariageTrouve.epouse || '').trim();
+
+        if (epoux.toUpperCase() === interesse) {
+            return epouse || 'Non precise';
+        }
+
+        return epoux || 'Non precise';
+    }
+
+    // Vérifie si les parents d'un sacrement correspondent aux parents d'un époux/épouse.
+    // Gère le cas où un seul parent est renseigné dans le mariage (ex: décès de l'autre parent).
+    // - Si un seul parent est renseigné d'un côté, on compare uniquement ce parent.
+    // - Si les deux parents sont renseignés des deux côtés, les deux doivent correspondre.
+    function parentsCorrespondent(pereSacrement, mereSacrement, pereMariage, mereMariage) {
+        const pereS = (pereSacrement || '').trim().toUpperCase();
+        const mereS = (mereSacrement || '').trim().toUpperCase();
+        const pereM = (pereMariage || '').trim().toUpperCase();
+        const mereM = (mereMariage || '').trim().toUpperCase();
+
+        // Aucun parent renseigné d'un côté ou de l'autre → pas de fortification possible.
+        if ((!pereS && !mereS) || (!pereM && !mereM)) {
+            return false;
+        }
+
+        // Compare les parents renseignés des deux côtés.
+        // Un parent absent d'un côté (ex: décès) est ignoré dans la comparaison.
+        const pereCorrespond = !pereS || !pereM || pereS === pereM;
+        const mereCorrespond = !mereS || !mereM || mereS === mereM;
+
+        // Si les deux parents sont renseignés des deux côtés, les deux doivent correspondre.
+        if (pereS && mereS && pereM && mereM) {
+            return pereCorrespond && mereCorrespond;
+        }
+
+        // Sinon, les parents renseignés des deux côtés doivent correspondre.
+        return pereCorrespond && mereCorrespond;
+    }
+
     global.AppUi = {
         showSection,
         setAuthenticated,
@@ -458,6 +550,7 @@
         setTablePage,
         goToTablePage,
         resolveRecordName,
-        resolveRecordDate
+        resolveRecordDate,
+        resolveMariageInfo
     };
 }(window));
