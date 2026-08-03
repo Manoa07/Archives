@@ -65,6 +65,22 @@ async function createWindow() {
         }
     });
 
+    // Autorise l'ouverture des fenêtres de prévisualisation PDF (URL blob).
+    mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+        if (url.startsWith('blob:')) {
+            return {
+                action: 'allow',
+                overrideBrowserWindowOptions: {
+                    width: 800,
+                    height: 600,
+                    autoHideMenuBar: true
+                }
+            };
+        }
+
+        return { action: 'deny' };
+    });
+
     mainWindow.webContents.session.on('will-download', (event, item, webContents) => {
         item.setSaveDialogOptions({
             title: 'Enregistrer le PDF',

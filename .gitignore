@@ -3,4 +3,5 @@ dist/
 *.db
 .DS_Store
 .env
+admin-password.json
 

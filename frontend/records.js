@@ -125,7 +125,6 @@
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(9);
             doc.setTextColor(90, 90, 90);
-            doc.text(`Export du ${formatReadableDate(new Date())}`, margins.left, 16);
             doc.text(`Page ${pageNumber} / ${totalPages}`, pageWidth - margins.right, 11, { align: 'right' });
 
             doc.setDrawColor(26, 67, 109);
@@ -370,18 +369,18 @@
     // Génère un certificat PDF pour un acte de baptême.
     function generatePdfBaptem(record) {
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
+        const doc = new jsPDF({ format: 'a5' });
 
         doc.setDrawColor(0);
         doc.setLineWidth(0.3);
-        doc.rect(20, 20, 170, 250);
+        doc.rect(10, 10, 128, 190);
         doc.setFont('Times New Roman');
-        doc.setFontSize(15);
-        doc.text('EKAR MD JEROME Anosibe', 95, 45, { align: 'right' });
-        doc.text('Distrika MAHAMASINA', 86, 52, { align: 'right' });
-        doc.setFontSize(19);
-        doc.text('FANAMARINANA NY NAHAVITANA BATEMY', 105, 65, { align: 'center' });
+        doc.setFontSize(13);
+        doc.text('EKAR MD JEROME Anosibe', 74, 35, { align: 'center' });
+        doc.text('Distrika MAHAMASINA', 74, 42, { align: 'center' });
         doc.setFontSize(16);
+        doc.text('FANAMARINANA NY NAHAVITANA BATEMY', 74, 55, { align: 'center' });
+        doc.setFontSize(13);
         const lines = [
             ['Anarana', record.interesse],
             ['Ray', record.pere],
@@ -395,30 +394,29 @@
             ["Batemy nataon'i", record.mon_pere],
             ['Afaka malalaka hanambady', '...............................................']
         ];
-        let y = 80;
+        let y = 70;
         lines.forEach(([label, value]) => {
-            doc.text(`${label} : ${value || ''}`, 30, y);
-            y += 10;
+            doc.text(`${label} : ${value || ''}`, 15, y);
+            y += 9;
         });
-        doc.setFontSize(14);
-        doc.text('..........................', 120, 230)
-        doc.setFontSize(14);
-        doc.text('Ny pretra mitondra faritany', 120, 240);
-        doc.save(`Fanamarinana_Batemy_${record.interesse || 'certificat'}.pdf`);
+        doc.setFontSize(12);
+        doc.text('..........................', 100, 185);
+        doc.text('Ny pretra mitondra faritany', 100, 195);
+        previewPdf(doc, `Fanamarinana_Batemy_${record.interesse || 'certificat'}.pdf`);
     }
 
     //Génère un format PDF pour les mariages
     function generatePdfMariage(record){
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        doc.rect(20, 20, 170, 250);
+        const doc = new jsPDF({ format: 'a5' });
+        doc.rect(10, 10, 128, 190);
         doc.setFont('Times New Roman');
-        doc.setFontSize(15);
-        doc.text('EKAR MD JEROME Anosibe', 95, 45, { align: 'right' });
-        doc.text('Distrika MAHAMASINA', 86, 52, { align: 'right' });
-        doc.setFontSize(19);
-        doc.text('FANAMARINANA', 105, 65, { align: 'center' });
+        doc.setFontSize(13);
+        doc.text('EKAR MD JEROME Anosibe', 74, 35, { align: 'center' });
+        doc.text('Distrika MAHAMASINA', 74, 42, { align: 'center' });
         doc.setFontSize(16);
+        doc.text('FANAMARINANA', 74, 55, { align: 'center' });
+        doc.setFontSize(13);
 
         const lines = [
             ['Andriamtoa', record.epoux],
@@ -431,28 +429,28 @@
             ["Nohamasinin'i", record.missionnaire],
             ['Anio', new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })],
         ];
-        let y = 80;
+        let y = 70;
         lines.forEach(([label, value]) => {
-            doc.text(`${label} : ${value || ''}`, 30, y);
-            y += 10;
+            doc.text(`${label} : ${value || ''}`, 15, y);
+            y += 9;
         });
-        doc.setFontSize(14);
-        doc.text("Ny PRETRA", 120, 170);
-        doc.save(`Fanamarinana_Mariazy_${record.epoux || 'certificat'}_sy_${record.epouse || 'certificat'}.pdf`);
+        doc.setFontSize(12);
+        doc.text("Ny PRETRA", 100, 170);
+        previewPdf(doc, `Fanamarinana_Mariazy_${record.epoux || 'certificat'}_sy_${record.epouse || 'certificat'}.pdf`);
     }
 
     //Genère un format PDF pour les autres sacrements
     function generatePdf(record) {
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        doc.rect(20, 20, 170, 250);
+        const doc = new jsPDF({ format: 'a5' });
+        doc.rect(10, 10, 128, 190);
         doc.setFont('Times New Roman');
-        doc.setFontSize(15);
-        doc.text('EKAR MD JEROME Anosibe', 95, 45, { align: 'right' });
-        doc.text('Distrika MAHAMASINA', 86, 52, { align: 'right' });
-        doc.setFontSize(19);
-        doc.text('FANAMARINANA', 105, 65, { align: 'center' });
+        doc.setFontSize(13);
+        doc.text('EKAR MD JEROME Anosibe', 74, 35, { align: 'center' });
+        doc.text('Distrika MAHAMASINA', 74, 42, { align: 'center' });
         doc.setFontSize(16);
+        doc.text('FANAMARINANA', 74, 55, { align: 'center' });
+        doc.setFontSize(13);
 
         const lines = [
             ['Anarana', record.interesse],
@@ -463,14 +461,58 @@
             ['dia efa nandray ny SAKRAMENTA ny', record.type],
             ['Ny', record.date_sacrement]
         ];
-         let y = 80;
+         let y = 70;
         lines.forEach(([label, value]) => {
-            doc.text(`${label} : ${value || ''}`, 30, y);
-            y += 10;
+            doc.text(`${label} : ${value || ''}`, 15, y);
+            y += 9;
         });
-        doc.setFontSize(14);
-        doc.text("Ny PRETRA", 120, 170);
-        doc.save(`Fanamarinana_${record.type || 'certificat'}_${record.interesse || 'certificat'}.pdf`);
+        doc.setFontSize(12);
+        doc.text("Ny PRETRA", 100, 170);
+        previewPdf(doc, `Fanamarinana_${record.type || 'certificat'}_${record.interesse || 'certificat'}.pdf`);
+    }
+
+    // Ouvre le modal de prévisualisation du PDF avant téléchargement.
+    function previewPdf(doc, filename) {
+        const blob = doc.output('blob');
+        const blobUrl = URL.createObjectURL(blob);
+
+        // Stocke l'URL et le nom pour le bouton de téléchargement.
+        AppState.pdfPreviewUrl = blobUrl;
+        AppState.pdfPreviewFilename = filename;
+
+        // Affiche le PDF dans l'iframe du modal.
+        AppDom.pdfPreviewFrame.src = blobUrl;
+        AppDom.pdfPreviewModal.hidden = false;
+        AppDom.pdfPreviewModal.style.display = 'flex';
+    }
+
+    // Ferme le modal de prévisualisation et libère la mémoire.
+    function closePdfPreview() {
+        AppDom.pdfPreviewModal.hidden = true;
+        AppDom.pdfPreviewModal.style.display = 'none';
+        AppDom.pdfPreviewFrame.src = '';
+
+        if (AppState.pdfPreviewUrl) {
+            URL.revokeObjectURL(AppState.pdfPreviewUrl);
+            AppState.pdfPreviewUrl = null;
+        }
+
+        AppState.pdfPreviewFilename = null;
+    }
+
+    // Télécharge le PDF prévisualisé puis ferme la fenêtre de prévisualisation.
+    function downloadPdfPreview() {
+        if (!AppState.pdfPreviewUrl) {
+            return;
+        }
+
+        const link = document.createElement('a');
+        link.href = AppState.pdfPreviewUrl;
+        link.download = AppState.pdfPreviewFilename || 'certificat.pdf';
+        link.click();
+
+        // Ferme automatiquement le modal après le téléchargement.
+        closePdfPreview();
     }
 
     // Compare deux enregistrements selon leur date métier pour garder un affichage stable.
@@ -695,6 +737,8 @@
         deleteSelectedRecord,
         generatePdfBaptem,
         generatePdfMariage,
-        generatePdf
+        generatePdf,
+        closePdfPreview,
+        downloadPdfPreview
     };
 }(window));

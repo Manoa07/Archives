@@ -8,6 +8,8 @@ window.AppState = {
     editingRecordType: null,
     deleteTargetId: null,
     deleteTargetType: null,
+    pdfPreviewUrl: null,
+    pdfPreviewFilename: null,
     tablePages: {
         results: 1,
         archives: 1,

@@ -34,6 +34,9 @@
         AppDom.editSacrementClose.addEventListener('click', handleCancelEdit);
         AppDom.editMariageCancel.addEventListener('click', handleCancelEdit);
         AppDom.editMariageClose.addEventListener('click', handleCancelEdit);
+        AppDom.pdfPreviewClose.addEventListener('click', AppRecords.closePdfPreview);
+        AppDom.pdfPreviewCancel.addEventListener('click', AppRecords.closePdfPreview);
+        AppDom.pdfPreviewDownload.addEventListener('click', AppRecords.downloadPdfPreview);
 
         AppDom.navButtons.forEach((button) => {
             button.addEventListener('click', async () => {

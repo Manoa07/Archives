@@ -20,6 +20,10 @@
     justify-self: start;
 }
 
+.header-right {
+    justify-self: end;
+}
+
 .header-center {
     display: flex;
     flex-direction: column;
