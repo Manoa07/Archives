@@ -6,7 +6,7 @@
   "scripts": {
     "start": "electron .",
     "start:web": "node server.js",
-    "build": "electron-builder"
+    "Pd": "electron-builder --win"
   },
   "keywords": [],
   "author": "Paroisse MD Gérôme",
@@ -23,12 +23,16 @@
     "electron": "^28.3.3",
     "electron-builder": "^24.13.3"
   },
-  "build": {
+ "build": {
     "appId": "com.eglise.archives",
     "productName": "ArchivesSacrements",
     "win": {
-      "target": "portable",
+      "target": "nsis",
       "icon": "icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
     },
     "directories": {
       "output": "dist"

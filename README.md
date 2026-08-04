@@ -44,7 +44,10 @@ L'application sera disponible sur `http://localhost:3000`.
 ```bash
 npm start
 ```
-
+Build
+```bash
+npm run Pd
+```
 ## Structure du projet
 
 ### Entrées principales
