@@ -1,6 +1,6 @@
 const express = require('express');
-const { ADMIN_PASSWORD, PORT, ROOT_DIR, SESSION_SECRET, validateConfig } = require('./backend/config');
-const { createDatabases, seedSacrementsIfEmpty, backfillCreatedAtIfMissing } = require('./backend/db');
+const { ADMIN_PASSWORD, DATA_DIR, PORT, ROOT_DIR, SESSION_SECRET, validateConfig } = require('./backend/config');
+const { createDatabases, backfillCreatedAtIfMissing } = require('./backend/db');
 const { applyBaseMiddleware } = require('./backend/middleware');
 const { registerAuthRoutes } = require('./backend/routes/auth');
 const { registerMariagesRoutes } = require('./backend/routes/mariages');
@@ -10,7 +10,7 @@ const { registerPageRoutes } = require('./backend/routes/pages');
 validateConfig();
 
 const app = express();
-const db = createDatabases(ROOT_DIR);
+const db = createDatabases(DATA_DIR);
 
 // Le point d'entrée assemble les briques, sans contenir leur logique interne.
 applyBaseMiddleware(app, ROOT_DIR, SESSION_SECRET);
@@ -21,7 +21,6 @@ registerPageRoutes(app, ROOT_DIR);
 
 // Démarre le backend HTTP après avoir préparé les données initiales.
 async function startServer() {
-    await seedSacrementsIfEmpty(db);
     await backfillCreatedAtIfMissing(db);
 
     return new Promise((resolve, reject) => {

@@ -1,11 +1,11 @@
 const { app, BrowserWindow, dialog } = require('electron');
 const http = require('http');
 const path = require('path');
-const { PORT } = require('./backend/config');
-const { startServer } = require('./server');
 
 let mainWindow;
 let backendServer;
+let PORT;
+let startServer;
 
 // Attend que le backend réponde avant d'ouvrir l'interface Electron.
 async function waitForServer(url, timeoutMs = 5000) {
@@ -42,6 +42,12 @@ function pingServer(url) {
 
 // Démarre le backend si nécessaire puis ouvre la fenêtre desktop Electron.
 async function createWindow() {
+    // Les fichiers modifiables vont dans AppData, jamais dans le dossier
+    // d'installation Windows qui peut être protégé par UAC.
+    process.env.ARCHIVES_DATA_DIR = app.getPath('userData');
+    ({ PORT } = require('./backend/config'));
+    ({ startServer } = require('./server'));
+
     const appUrl = `http://localhost:${PORT}`;
 
     // Si un backend existe déjà sur ce port, Electron le réutilise.

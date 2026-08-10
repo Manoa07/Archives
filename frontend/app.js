@@ -17,6 +17,9 @@
     function bindEvents() {
         AppDom.loginForm.addEventListener('submit', handleLoginSubmit);
         AppDom.passwordForm.addEventListener('submit', handlePasswordChangeSubmit);
+        document.querySelectorAll('[data-password-toggle]').forEach((button) => {
+            button.addEventListener('click', handlePasswordToggle);
+        });
         AppDom.logoutButton.addEventListener('click', handleLogoutClick);
         AppDom.mariageForm.addEventListener('submit', handleMariageSubmit);
         AppDom.sacrementForm.addEventListener('submit', handleSacrementSubmit);
@@ -57,6 +60,16 @@
         AppDom.dashboardCards.forEach((card) => {
             card.addEventListener('click', () => AppRecords.filterByType(card.dataset.filterType));
         });
+    }
+
+    function handlePasswordToggle(event) {
+        const button = event.currentTarget;
+        const input = button.parentElement.querySelector('input');
+        const isVisible = input.type === 'text';
+
+        input.type = isVisible ? 'password' : 'text';
+        button.setAttribute('aria-pressed', String(!isVisible));
+        button.setAttribute('aria-label', isVisible ? 'Afficher le mot de passe' : 'Masquer le mot de passe');
     }
 
     // Vérifie si une session admin existe déjà pour éviter une reconnexion.

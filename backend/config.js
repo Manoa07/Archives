@@ -1,11 +1,20 @@
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
+
+const APP_ROOT_DIR = path.join(__dirname, '..');
+const DATA_DIR = process.env.ARCHIVES_DATA_DIR || APP_ROOT_DIR;
 
 // Charge un fichier .env simple pour alimenter process.env en local.
 function loadEnvFile() {
-    const envPath = path.join(__dirname, '..', '.env');
+    const envPaths = [
+        path.join(DATA_DIR, '.env'),
+        path.join(APP_ROOT_DIR, '.env')
+    ];
 
-    if (!fs.existsSync(envPath)) {
+    const envPath = envPaths.find((candidate) => fs.existsSync(candidate));
+
+    if (!envPath) {
         return;
     }
 
@@ -34,10 +43,33 @@ function loadEnvFile() {
 loadEnvFile();
 
 const PORT = Number(process.env.PORT) || 3000;
+const ROOT_DIR = APP_ROOT_DIR;
+const ADMIN_PASSWORD_FILE = path.join(DATA_DIR, 'admin-password.json');
+
+// Une installation Electron ne doit pas dépendre d'un fichier .env placé dans
+// Program Files. La configuration locale est donc créée dans userData.
+function createPackagedConfigIfNeeded() {
+    const isPackagedElectron = Boolean(process.versions.electron && process.env.ARCHIVES_DATA_DIR);
+
+    if (!isPackagedElectron) {
+        return;
+    }
+
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+
+    if (!process.env.SESSION_SECRET) {
+        process.env.SESSION_SECRET = crypto.randomBytes(32).toString('hex');
+    }
+
+    if (!process.env.ADMIN_PASSWORD) {
+        process.env.ADMIN_PASSWORD = 'admin';
+    }
+}
+
+createPackagedConfigIfNeeded();
+
 const SESSION_SECRET = process.env.SESSION_SECRET;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
-const ADMIN_PASSWORD_FILE = path.join(__dirname, '..', 'admin-password.json');
-const ROOT_DIR = path.join(__dirname, '..');
 
 // Vérifie que les variables critiques existent avant de démarrer le serveur.
 function validateConfig() {
@@ -52,6 +84,7 @@ function validateConfig() {
 module.exports = {
     ADMIN_PASSWORD,
     ADMIN_PASSWORD_FILE,
+    DATA_DIR,
     PORT,
     ROOT_DIR,
     SESSION_SECRET,

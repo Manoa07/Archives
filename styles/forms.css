@@ -38,6 +38,38 @@
     gap: 8px;
 }
 
+.password-field {
+    position: relative;
+}
+
+.password-field input {
+    padding-right: 46px;
+}
+
+.password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--color-primary);
+    cursor: pointer;
+    font-size: 18px;
+    transform: translateY(-50%);
+}
+
+.password-toggle:hover,
+.password-toggle:focus-visible {
+    background: #edf2f7;
+}
+
 .field-group-full {
     grid-column: 1 / -1;
 }

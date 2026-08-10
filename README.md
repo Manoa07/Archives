@@ -46,8 +46,14 @@ npm start
 ```
 Build
 ```bash
-npm run Pd
+npm run build:win
 ```
+
+L'installateur Windows est généré dans `dist/`. Après installation, les bases
+de données et le mot de passe sont conservés dans le dossier de données local
+de l'utilisateur Windows, et non dans `Program Files`. Au premier lancement,
+le mot de passe initial est `admin` : changez-le immédiatement dans
+l'application.
 ## Structure du projet
 
 ### Entrées principales

@@ -6,7 +6,8 @@
   "scripts": {
     "start": "electron .",
     "start:web": "node server.js",
-    "Pd": "electron-builder --win"
+    "build:win": "electron-builder --win",
+    "Pd": "npm run build:win"
   },
   "keywords": [],
   "author": "Paroisse MD Gérôme",
@@ -26,6 +27,13 @@
  "build": {
     "appId": "com.eglise.archives",
     "productName": "ArchivesSacrements",
+    "files": [
+      "**/*",
+      "!.env",
+      "!admin-password.json",
+      "!*.db",
+      "!dist{,/**}"
+    ],
     "win": {
       "target": "nsis",
       "icon": "icon.ico"
