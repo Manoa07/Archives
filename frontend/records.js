@@ -400,8 +400,8 @@
             y += 9;
         });
         doc.setFontSize(12);
-        doc.text('..........................', 100, 185);
-        doc.text('Ny pretra mitondra faritany', 100, 195);
+        doc.text('Ny pretra mitondra faritany', 85, 185);
+        doc.text('..........................', 100, 195);
         previewPdf(doc, `Fanamarinana_Batemy_${record.interesse || 'certificat'}.pdf`);
     }
 
@@ -435,7 +435,7 @@
             y += 9;
         });
         doc.setFontSize(12);
-        doc.text("Ny PRETRA", 100, 170);
+        doc.text("Ny PRETRA", 85, 170);
         previewPdf(doc, `Fanamarinana_Mariazy_${record.epoux || 'certificat'}_sy_${record.epouse || 'certificat'}.pdf`);
     }
 
@@ -467,7 +467,7 @@
             y += 9;
         });
         doc.setFontSize(12);
-        doc.text("Ny PRETRA", 100, 170);
+        doc.text("Ny PRETRA", 85, 170);
         previewPdf(doc, `Fanamarinana_${record.type || 'certificat'}_${record.interesse || 'certificat'}.pdf`);
     }
 
